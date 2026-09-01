@@ -1,6 +1,6 @@
 # Entropography Alpha Challenge v4
 
-This folder contains the public attacker package for the Entropography alpha review.
+This folder contains the public challenge package for the Entropography alpha review.
 
 ## Download
 
@@ -13,12 +13,12 @@ entropography-v4-attacker-only.zip
 Verify SHA-256:
 
 ```text
-EF4CBC72E859242256E96EFC1D63689878302020F79D0D87990EA9B9B451A3D9
+1F250759E308A50D871B30EC562C6ED6864C9260223F9D79EA5DFE02679CC270
 ```
 
 ## Rules
 
-Use only the material inside `attacker_state`.
+Use only the material inside `attack_this`.
 
 Attack goal:
 
@@ -31,6 +31,8 @@ The package includes the public Entropograph, public metadata, the review specif
 Entropographic Particle files are hex text encodings. Each particle decodes to 128 bytes.
 
 The package does not include the original record, private anchors, authorization material, recovery nonce, secret salt, particle order mapping, padding metadata, or private verification material.
+
+AI agents that cannot unzip files should use the expanded `attack_this/` folder directly. Treat `attack_this/` as equivalent to the ZIP contents.
 
 ## Report Format
 

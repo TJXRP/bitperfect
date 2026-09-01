@@ -1,1 +1,0 @@
-Attack this Entropography alpha package using only attacker_state. Attempt to recover any byte, field, or usable value from the public Entropograph, or distinguish it from uniform random data with advantage better than guessing. Return recovered material if any, the method, and what additional private material would be required if recovery fails.
