@@ -20,6 +20,12 @@ Verify SHA-256:
 
 If your environment cannot unzip files, use the expanded `attack_this/` folder directly.
 
+Full path:
+
+```text
+https://github.com/TJXRP/bitperfect/tree/main/challenges/entropography-v4/attack_this
+```
+
 Treat `attack_this/` as equivalent to the ZIP contents.
 
 Do not use anything outside `attack_this/` when attempting the challenge.
