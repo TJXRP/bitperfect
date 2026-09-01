@@ -7,21 +7,6 @@
   <title>BitPerfect - Entropography</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <style>
-    :root {
-      --bg: #04070d;
-      --panel: rgba(10, 17, 25, 0.78);
-      --panel-strong: rgba(13, 21, 31, 0.94);
-      --line: rgba(255, 255, 255, 0.16);
-      --text: #f7f9ff;
-      --muted: #c9d2df;
-      --orange: #ff9f2f;
-      --green: #76d13d;
-      --blue: #4ba3ff;
-      --code: #0d1722;
-      --sans: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      --mono: "SFMono-Regular", Menlo, "Consolas", "Liberation Mono", monospace;
-    }
-
     * {
       box-sizing: border-box;
     }
@@ -29,15 +14,15 @@
     body {
       margin: 0;
       min-height: 100vh;
-      color: var(--text);
+      color: #f7f9ff;
       background-color: #080c14;
       background-image:
-        linear-gradient(rgba(7, 11, 18, .16), rgba(7, 11, 18, .16));
+        linear-gradient(#070b1229, #070b1229);
       background-position: center center;
       background-size: cover;
       background-repeat: no-repeat;
       background-attachment: fixed;
-      font-family: var(--sans);
+      font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 20px;
       line-height: 1.5;
       overflow-x: hidden;
@@ -50,8 +35,8 @@
       z-index: 0;
       pointer-events: none;
       background-image:
-        linear-gradient(rgba(7, 11, 18, .16), rgba(7, 11, 18, .16)),
-        radial-gradient(ellipse at 60% 30%, transparent 40%, rgba(10, 12, 20, .35) 100%),
+        linear-gradient(#070b1229, #070b1229),
+        radial-gradient(ellipse at 60% 30%, transparent 40%, #0a0c1459 100%),
         url("assets/backgrounds/earthrise.png");
       background-position: center center;
       background-size: cover;
@@ -107,7 +92,7 @@
     .tagline {
       max-width: 880px;
       margin-top: 18px;
-      color: var(--muted);
+      color: #c9d2df;
       font-size: clamp(1.1rem, 2.6vw, 1.6rem);
     }
 
@@ -136,7 +121,7 @@
 
     a,
     button {
-      color: var(--text);
+      color: #f7f9ff;
     }
 
     .button {
@@ -145,10 +130,10 @@
       justify-content: center;
       min-height: 48px;
       padding: 12px 16px;
-      border: 1px solid rgba(255, 159, 47, 0.75);
+      border: 1px solid #ff9f2fbf;
       border-radius: 8px;
-      background: rgba(255, 159, 47, 0.12);
-      color: var(--text);
+      background: #ff9f2f1f;
+      color: #f7f9ff;
       font-weight: 800;
       text-decoration: none;
       cursor: pointer;
@@ -156,20 +141,20 @@
     }
 
     .button.secondary {
-      border-color: var(--line);
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--muted);
+      border-color: #ffffff29;
+      background: #ffffff0f;
+      color: #c9d2df;
     }
 
     .button.generated {
-      border-color: rgba(118, 209, 61, 0.95);
-      background: rgba(118, 209, 61, 0.16);
-      color: var(--green);
+      border-color: #76b900f2;
+      background: #76b90029;
+      color: #76b900;
     }
 
     .button.green {
       border-color: #76b900;
-      background: rgba(118, 185, 0, 0.18);
+      background: #76b9002e;
       color: #ffffff;
     }
 
@@ -178,7 +163,7 @@
       border-color: #76b900;
       background: #76b900;
       color: #ffffff;
-      box-shadow: 0 8px 22px rgba(118, 185, 0, 0.25);
+      box-shadow: 0 8px 22px #76b90040;
     }
 
     .modal .button.green:hover,
@@ -198,7 +183,7 @@
       display: none;
       place-items: center;
       padding: 18px;
-      background: rgba(0, 0, 0, 0.66);
+      background: #000000a8;
     }
 
     .modal-backdrop.open {
@@ -213,7 +198,7 @@
       border-radius: 8px;
       background: #f7f9fc;
       color: #111827;
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 30px 90px #0000008c;
       padding: 24px;
     }
 
@@ -262,7 +247,7 @@
       background: #ffffff;
       color: #111827;
       padding: 14px;
-      font: 0.95rem/1.45 var(--mono);
+      font: 0.95rem/1.45 "SFMono-Regular", Menlo, "Consolas", "Liberation Mono", monospace;
       resize: vertical;
     }
 
@@ -274,17 +259,17 @@
     }
 
     .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
+      background: #0a1119c7;
+      border: 1px solid #ffffff29;
       border-radius: 8px;
       padding: 22px;
-      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+      box-shadow: 0 24px 80px #00000047;
       backdrop-filter: blur(12px);
     }
 
     .panel h2 {
-      color: var(--orange);
-      font-family: var(--mono);
+      color: #ff9f2f;
+      font-family: "SFMono-Regular", Menlo, "Consolas", "Liberation Mono", monospace;
       font-size: 1.25rem;
       margin-bottom: 14px;
     }
@@ -297,9 +282,9 @@
 
     .drop {
       min-height: 190px;
-      border: 1px dashed rgba(255, 255, 255, 0.32);
+      border: 1px dashed #ffffff52;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff0d;
       padding: 22px;
       display: grid;
       gap: 12px;
@@ -308,24 +293,24 @@
     }
 
     .drop.drag-active {
-      border-color: var(--orange);
-      background: rgba(255, 159, 47, 0.1);
+      border-color: #ff9f2f;
+      background: #ff9f2f1a;
     }
 
     .drop-title {
-      color: var(--orange);
+      color: #ff9f2f;
       font-weight: 900;
       font-size: 1.35rem;
     }
 
     .drop-subtitle {
-      color: var(--muted);
+      color: #c9d2df;
       font-size: 1rem;
     }
 
     .file-name {
-      color: var(--green);
-      font-family: var(--mono);
+      color: #76b900;
+      font-family: "SFMono-Regular", Menlo, "Consolas", "Liberation Mono", monospace;
       font-size: 0.95rem;
       overflow-wrap: anywhere;
       min-height: 1.4em;
@@ -350,19 +335,19 @@
       width: 100%;
       min-height: 260px;
       resize: vertical;
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      border: 1px solid #ffffff2e;
       border-radius: 8px;
       background: #08121d;
-      color: var(--text);
+      color: #f7f9ff;
       padding: 14px;
-      font: 1rem/1.45 var(--mono);
+      font: 1rem/1.45 "SFMono-Regular", Menlo, "Consolas", "Liberation Mono", monospace;
     }
 
     .preview {
       display: none;
       width: 100%;
       min-height: 260px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
+      border: 1px solid #ffffff2e;
       border-radius: 8px;
       background: #08121d;
       padding: 14px;
@@ -396,11 +381,11 @@
       gap: 10px;
       align-content: center;
       min-height: 220px;
-      color: var(--muted);
+      color: #c9d2df;
     }
 
     .file-card strong {
-      color: var(--text);
+      color: #f7f9ff;
       font-size: 1.25rem;
       overflow-wrap: anywhere;
     }
@@ -413,31 +398,31 @@
     }
 
     .metric {
-      border: 1px solid var(--line);
+      border: 1px solid #ffffff29;
       border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
+      background: #ffffff0d;
       padding: 14px;
       min-height: 92px;
     }
 
     .label {
       display: block;
-      color: var(--orange);
-      font-family: var(--mono);
+      color: #ff9f2f;
+      font-family: "SFMono-Regular", Menlo, "Consolas", "Liberation Mono", monospace;
       font-size: 0.86rem;
       margin-bottom: 6px;
     }
 
     .value {
       display: block;
-      color: var(--text);
+      color: #f7f9ff;
       font-size: 1.15rem;
       font-weight: 800;
       overflow-wrap: anywhere;
     }
 
     .value.green {
-      color: var(--green);
+      color: #76b900;
     }
 
     .particles {
@@ -460,12 +445,12 @@
       min-height: 320px;
       display: grid;
       place-items: center;
-      border: 1px dashed rgba(255, 255, 255, 0.22);
+      border: 1px dashed #ffffff38;
       border-radius: 8px;
-      color: rgba(255, 255, 255, 0.62);
+      color: #ffffff9e;
       text-align: center;
       padding: 24px;
-      background: rgba(255, 255, 255, 0.035);
+      background: #ffffff09;
     }
 
     .particle {
@@ -474,26 +459,26 @@
       gap: 12px;
       align-items: start;
       padding: 14px;
-      border: 1px solid rgba(255, 255, 255, 0.13);
+      border: 1px solid #ffffff21;
       border-radius: 8px;
-      background: var(--panel-strong);
+      background: #0d151ff0;
     }
 
     .particle-id {
-      color: var(--blue);
-      font: 0.92rem/1.35 var(--mono);
+      color: #4ba3ff;
+      font: 0.92rem/1.35 "SFMono-Regular", Menlo, "Consolas", "Liberation Mono", monospace;
       overflow-wrap: anywhere;
     }
 
     .particle-bytes {
-      color: var(--green);
-      font: 1rem/1.55 var(--mono);
+      color: #76b900;
+      font: 1rem/1.55 "SFMono-Regular", Menlo, "Consolas", "Liberation Mono", monospace;
       overflow-wrap: anywhere;
     }
 
     .note {
       margin-top: 14px;
-      color: rgba(255, 255, 255, 0.76);
+      color: #ffffffc2;
       font-size: 0.95rem;
     }
 
