@@ -1,0 +1,1110 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BitPerfect - Entropography</title>
+  <style>
+    :root {
+      --bg: #04070d;
+      --panel: rgba(10, 17, 25, 0.78);
+      --panel-strong: rgba(13, 21, 31, 0.94);
+      --line: rgba(255, 255, 255, 0.16);
+      --text: #f7f9ff;
+      --muted: #c9d2df;
+      --orange: #ff9f2f;
+      --green: #76d13d;
+      --blue: #4ba3ff;
+      --code: #0d1722;
+      --sans: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --mono: "SFMono-Regular", Menlo, "Consolas", "Liberation Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background-color: #080c14;
+      background-image:
+        linear-gradient(rgba(7, 11, 18, .16), rgba(7, 11, 18, .16));
+      background-position: center center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: var(--sans);
+      font-size: 20px;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(7, 11, 18, .16), rgba(7, 11, 18, .16)),
+        radial-gradient(ellipse at 60% 30%, transparent 40%, rgba(10, 12, 20, .35) 100%),
+        url("assets/backgrounds/earthrise.png");
+      background-position: center center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      transform: rotate(-37deg) scale(1.35);
+      transform-origin: center center;
+    }
+
+    .cosmos {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    #star-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    main {
+      position: relative;
+      z-index: 2;
+      width: min(1440px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 52px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 20px;
+      align-items: end;
+      margin-bottom: 28px;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 2.1rem;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .tagline {
+      max-width: 880px;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+    }
+
+    .protocol-line {
+      margin-top: 10px;
+      color: #76b900;
+      font-size: 20pt;
+      font-weight: 900;
+      line-height: 1.25;
+    }
+
+    .attacker-line {
+      color: #ffffff;
+      font-size: 1.25rem;
+      font-weight: 400;
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    a,
+    button {
+      color: var(--text);
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255, 159, 47, 0.75);
+      border-radius: 8px;
+      background: rgba(255, 159, 47, 0.12);
+      color: var(--text);
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    .button.secondary {
+      border-color: var(--line);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--muted);
+    }
+
+    .button.generated {
+      border-color: rgba(118, 209, 61, 0.95);
+      background: rgba(118, 209, 61, 0.16);
+      color: var(--green);
+    }
+
+    .button.green {
+      border-color: #76b900;
+      background: rgba(118, 185, 0, 0.18);
+      color: #ffffff;
+    }
+
+    .modal .button.green {
+      min-width: 210px;
+      border-color: #76b900;
+      background: #76b900;
+      color: #ffffff;
+      box-shadow: 0 8px 22px rgba(118, 185, 0, 0.25);
+    }
+
+    .modal .button.green:hover,
+    .modal .button.green:focus-visible {
+      background: #669f00;
+    }
+
+    .copy-status {
+      color: #76b900;
+      font-weight: 800;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: none;
+      place-items: center;
+      padding: 18px;
+      background: rgba(0, 0, 0, 0.66);
+    }
+
+    .modal-backdrop.open {
+      display: grid;
+    }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: min(88vh, 760px);
+      overflow: auto;
+      border: 1px solid #d8dde8;
+      border-radius: 8px;
+      background: #f7f9fc;
+      color: #111827;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+      padding: 24px;
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .modal-title {
+      color: #76b900;
+      font-size: 1.45rem;
+      font-weight: 900;
+      line-height: 1.2;
+    }
+
+    .modal-close {
+      min-width: 44px;
+      min-height: 44px;
+      border: 1px solid #d8dde8;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #111827;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .modal-list {
+      margin: 0 0 16px;
+      padding-left: 1.2em;
+      color: #111827;
+    }
+
+    .modal-list li {
+      margin-bottom: 8px;
+    }
+
+    .copy-box {
+      width: 100%;
+      min-height: 170px;
+      margin: 14px 0;
+      border: 1px solid #cdd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #111827;
+      padding: 14px;
+      font: 0.95rem/1.45 var(--mono);
+      resize: vertical;
+    }
+
+    .lab {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.25fr);
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(12px);
+    }
+
+    .panel h2 {
+      color: var(--orange);
+      font-family: var(--mono);
+      font-size: 1.25rem;
+      margin-bottom: 14px;
+    }
+
+    .input-controls {
+      display: grid;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .drop {
+      min-height: 190px;
+      border: 1px dashed rgba(255, 255, 255, 0.32);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 22px;
+      display: grid;
+      gap: 12px;
+      place-items: center;
+      text-align: center;
+    }
+
+    .drop.drag-active {
+      border-color: var(--orange);
+      background: rgba(255, 159, 47, 0.1);
+    }
+
+    .drop-title {
+      color: var(--orange);
+      font-weight: 900;
+      font-size: 1.35rem;
+    }
+
+    .drop-subtitle {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .file-name {
+      color: var(--green);
+      font-family: var(--mono);
+      font-size: 0.95rem;
+      overflow-wrap: anywhere;
+      min-height: 1.4em;
+    }
+
+    .file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+    }
+
+    .preview-wrap {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 260px;
+      resize: vertical;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: #08121d;
+      color: var(--text);
+      padding: 14px;
+      font: 1rem/1.45 var(--mono);
+    }
+
+    .preview {
+      display: none;
+      width: 100%;
+      min-height: 260px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      background: #08121d;
+      padding: 14px;
+      overflow: auto;
+    }
+
+    .preview.active {
+      display: block;
+    }
+
+    .preview img {
+      display: block;
+      width: 100%;
+      max-height: 420px;
+      object-fit: contain;
+      border-radius: 6px;
+      background: #05080f;
+    }
+
+    .preview pre {
+      margin: 0;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .file-card {
+      display: grid;
+      gap: 10px;
+      align-content: center;
+      min-height: 220px;
+      color: var(--muted);
+    }
+
+    .file-card strong {
+      color: var(--text);
+      font-size: 1.25rem;
+      overflow-wrap: anywhere;
+    }
+
+    .status {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 14px;
+      min-height: 92px;
+    }
+
+    .label {
+      display: block;
+      color: var(--orange);
+      font-family: var(--mono);
+      font-size: 0.86rem;
+      margin-bottom: 6px;
+    }
+
+    .value {
+      display: block;
+      color: var(--text);
+      font-size: 1.15rem;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .value.green {
+      color: var(--green);
+    }
+
+    .particles {
+      display: grid;
+      gap: 10px;
+      max-height: 620px;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .empty-state {
+      min-height: 320px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.62);
+      text-align: center;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.035);
+    }
+
+    .particle {
+      display: grid;
+      grid-template-columns: 150px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      border-radius: 8px;
+      background: var(--panel-strong);
+    }
+
+    .particle-id {
+      color: var(--blue);
+      font: 0.92rem/1.35 var(--mono);
+      overflow-wrap: anywhere;
+    }
+
+    .particle-bytes {
+      color: var(--green);
+      font: 1rem/1.55 var(--mono);
+      overflow-wrap: anywhere;
+    }
+
+    .note {
+      margin-top: 14px;
+      color: rgba(255, 255, 255, 0.76);
+      font-size: 0.95rem;
+    }
+
+    .modal .copy-status {
+      color: #76b900;
+      font-weight: 800;
+    }
+
+    .error {
+      color: #ffb0aa;
+      font-weight: 800;
+    }
+
+    @media (max-width: 980px) {
+
+      header,
+      .lab {
+        grid-template-columns: 1fr;
+      }
+
+      .actions {
+        justify-content: flex-start;
+      }
+
+      .status {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      body {
+        font-size: 18px;
+      }
+
+      main {
+        width: min(100% - 20px, 1440px);
+        padding-top: 24px;
+      }
+
+      .status {
+        grid-template-columns: 1fr;
+      }
+
+      .particle {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="cosmos" aria-hidden="true">
+    <canvas id="star-canvas"></canvas>
+  </div>
+
+  <main>
+    <header>
+      <div>
+        <h1>Entropic Dispersal and Reassembly&trade; (EDR)</h1>
+        <p class="protocol-line">A Unified Post-quantum Data Protocol</p>
+        <p class="tagline">This is a live demo of Entropography&trade; (EDR). Drop text or a file. The browser produces
+          one
+          real Entropograph in real time, made from 1,024 Particles.</p>
+      </div>
+      <nav class="actions" aria-label="Challenge links">
+        <button id="openAttackModal" class="button green" type="button">- Hack EDR with AI -</button>
+        <a class="button secondary" href="challenges/entropography-v4/attack_this/RECONSTRUCTION-SPEC.md"
+          download>Download EDR Spec Sheet ↓</a>
+      </nav>
+    </header>
+
+    <section class="lab" aria-label="Entropography live demo">
+      <div class="panel">
+        <p class="protocol-line">Input</p>
+        <p class="attacker-line">Select any file type to secure with EDR.</p>
+        <div id="drop" class="drop">
+          <p class="drop-title">Drop a file here</p>
+          <p class="drop-subtitle">or paste text below</p>
+          <label class="button secondary" for="fileInput">Browse Files</label>
+          <input id="fileInput" class="file-input" type="file">
+          <p id="fileName" class="file-name">No file selected - using text input</p>
+        </div>
+        <div class="input-controls">
+          <button id="runButton" class="button" type="button">Generate Entropograph</button>
+          <p id="message" class="note">Limit: 2 MB per object. Processing stays in this browser tab.</p>
+        </div>
+        <div class="preview-wrap">
+          <textarea id="sourceText"
+            spellcheck="false">{"person_id":"5","gender_concept_id":"8507","year_of_birth":"1963","month_of_birth":"10","day_of_birth":"19"}</textarea>
+          <div id="preview" class="preview" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="protocol-line">Entropographic conversion</p>
+        <p id="conversionLine" class="attacker-line">This is what a successful attacker finds.</p>
+        <div class="status">
+          <div class="metric">
+            <span class="label">Particles In This Entropograph</span>
+            <span id="particleCount" class="value">0</span>
+          </div>
+          <div class="metric">
+            <span class="label">Particle Size</span>
+            <span class="value">2,048 bytes</span>
+          </div>
+          <div class="metric">
+            <span class="label">Input Bytes</span>
+            <span id="inputBytes" class="value">0</span>
+          </div>
+          <div class="metric">
+            <span class="label">Status</span>
+            <span id="statusText" class="value green">Ready</span>
+          </div>
+        </div>
+        <div id="particles" class="particles" aria-live="polite">
+          <div class="empty-state">Generate an Entropograph to reveal the particles.</div>
+        </div>
+        <p class="note">The page shows the first 32 particles and the first 160 bytes of each particle for readability.
+          The generated Entropograph contains all 1,024 full particles.</p>
+      </div>
+    </section>
+  </main>
+
+  <div id="attackModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="attackModalTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <h2 id="attackModalTitle" class="modal-title">Try to break EDR with AI</h2>
+        <button id="closeAttackModal" class="modal-close" type="button" aria-label="Close">x</button>
+      </div>
+      <ul class="modal-list">
+        <li>Give an AI agent the public challenge folder.</li>
+        <li>Use any tools, models, scripts, or compute you want, but the only thing you can hack is inside our
+          `attack_this/` folder.</li>
+        <li>The goal is to recover hidden data or find a reproducible distinguisher.</li>
+        <li>The final answer must be a link to a completed HTML report.</li>
+      </ul>
+      <textarea id="aiPrompt" class="copy-box" readonly>Attack the Entropography v4 public challenge using only this folder:
+https://github.com/TJXRP/bitperfect/tree/main/challenges/entropography-v4/attack_this
+
+Use any tools, models, scripts, or compute you want, but the only thing you can hack is inside our "attack_this/" folder.
+
+Goal: recover any byte, field, or usable value from the original record, or distinguish the public Entropograph from uniform random data with advantage better than guessing.
+
+Create a human-readable HTML report using:
+https://github.com/TJXRP/bitperfect/blob/main/challenges/entropography-v4/attack_this/ATTACK-REPORT-TEMPLATE.html
+
+Return a public link to the completed HTML report. Do not paste the full HTML into chat.
+
+If you cannot publish files, return a downloadable HTML file artifact or open a pull request adding the report under:
+https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea>
+      <div class="actions">
+        <button id="copyAiPrompt" class="button green" type="button">Copy AI Prompt</button>
+        <a class="button green" href="https://github.com/TJXRP/bitperfect/tree/main/challenges/entropography-v4/attack_this" target="_blank" rel="noopener">Open Attack Folder ↗</a>
+      </div>
+      <p id="copyStatus" class="note copy-status" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+      var sc = document.getElementById("star-canvas");
+      if (!sc) return;
+      var cx = sc.getContext("2d");
+      if (!cx) return;
+      var stars = [];
+      var speed = 7.5;
+
+      function resize() {
+        sc.width = window.innerWidth;
+        sc.height = window.innerHeight;
+      }
+
+      function Star() {
+        this.x = Math.random() * sc.width * 0.75;
+        this.y = Math.random() * sc.height * 0.35;
+        this.vx = (1.5 + Math.random() * 2) * (speed / 5);
+        this.vy = (0.8 + Math.random() * 1.2) * (speed / 5);
+        this.trail = [];
+        this.maxTrail = 28;
+        this.alive = true;
+        this.alpha = 0;
+        var sp = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+        var d = Math.sqrt(sc.width * sc.width + sc.height * sc.height);
+        this.maxLife = Math.round(d / sp * 0.65);
+        this.age = 0;
+        this.fadeInEnd = 12;
+        this.fadeOutStart = Math.round(this.maxLife * 0.6);
+      }
+
+      Star.prototype.update = function () {
+        this.age += 1;
+        if (this.age <= this.fadeInEnd) {
+          this.alpha = this.age / this.fadeInEnd;
+        } else if (this.age >= this.fadeOutStart) {
+          var p = (this.age - this.fadeOutStart) / (this.maxLife - this.fadeOutStart);
+          this.alpha = Math.max(0, 1 - p * p);
+        }
+        if (this.age >= this.maxLife) {
+          this.alive = false;
+          return;
+        }
+        this.trail.unshift({ x: this.x, y: this.y });
+        if (this.trail.length > this.maxTrail) this.trail.pop();
+        this.x += this.vx;
+        this.y += this.vy;
+      };
+
+      Star.prototype.draw = function () {
+        if (this.trail.length < 2 || this.alpha <= 0) return;
+        var bz = sc.height * 0.67;
+        var burn = this.y > bz ? Math.min(1, (this.y - bz) / (sc.height * 0.28)) : 0;
+        var cr = Math.round(200 + burn * 55);
+        var cg = Math.round(220 - burn * 90);
+        var cb = Math.round(255 - burn * 230);
+        var hg = Math.round(255 - burn * 160);
+        var hb = Math.round(255 - burn * 240);
+
+        for (var i = 1; i < this.trail.length; i += 1) {
+          var r = 1 - i / this.trail.length;
+          var a = r * r * 0.65 * this.alpha;
+          cx.beginPath();
+          cx.moveTo(this.trail[i - 1].x, this.trail[i - 1].y);
+          cx.lineTo(this.trail[i].x, this.trail[i].y);
+          cx.strokeStyle = "rgba(" + cr + "," + cg + "," + cb + "," + a + ")";
+          cx.lineWidth = r * (1.6 + burn * 0.8);
+          cx.stroke();
+        }
+
+        var g = cx.createRadialGradient(this.x, this.y, 0, this.x, this.y, 4 + burn * 3);
+        g.addColorStop(0, "rgba(255," + hg + "," + hb + "," + (0.9 * this.alpha) + ")");
+        g.addColorStop(1, "rgba(255,120,0,0)");
+        cx.beginPath();
+        cx.arc(this.x, this.y, 4 + burn * 3, 0, Math.PI * 2);
+        cx.fillStyle = g;
+        cx.fill();
+      };
+
+      var timer = 0;
+      var next = 8;
+      var burst = 0;
+      var burstTotal = 7;
+      var reduceMotion = window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      function randomSpawn() {
+        return 240 + Math.floor(Math.random() * 360);
+      }
+
+      function animate() {
+        if (reduceMotion) return;
+        cx.clearRect(0, 0, sc.width, sc.height);
+        timer += 1;
+        var spawnNow = burst < burstTotal
+          ? timer >= next
+          : (timer >= next && stars.length < 4);
+        if (spawnNow) {
+          stars.push(new Star());
+          timer = 0;
+          if (burst < burstTotal) {
+            burst += 1;
+            next = 28 + Math.floor(Math.random() * 40);
+            if (burst >= burstTotal) next = randomSpawn();
+          } else {
+            next = randomSpawn();
+          }
+        }
+        stars = stars.filter(function (s) { return s.alive; });
+        stars.forEach(function (s) {
+          s.update();
+          s.draw();
+        });
+        window.requestAnimationFrame(animate);
+      }
+
+      resize();
+      window.addEventListener("resize", resize);
+      animate();
+    })();
+
+    const PARTICLE_COUNT = 1024;
+    const PARTICLE_BYTES = 2048;
+    const MAX_RECORD_BYTES = PARTICLE_COUNT * PARTICLE_BYTES;
+    const SAMPLE_PARTICLES = 32;
+    const PREVIEW_BYTES = 160;
+    const encoder = new TextEncoder();
+    let droppedFile = null;
+
+    function openAttackModal() {
+      document.getElementById('attackModal').classList.add('open');
+    }
+
+    function closeAttackModal() {
+      document.getElementById('attackModal').classList.remove('open');
+    }
+
+    async function copyAiPrompt() {
+      const prompt = document.getElementById('aiPrompt');
+      prompt.select();
+      prompt.setSelectionRange(0, prompt.value.length);
+      await navigator.clipboard.writeText(prompt.value);
+      document.getElementById('copyStatus').textContent = 'Copied AI prompt and attack folder link.';
+    }
+
+    const roundConstants = [
+      1n, 32898n, 9223372036854808714n, 9223372039002292224n, 32907n, 2147483649n,
+      9223372039002292353n, 9223372036854808585n, 138n, 136n, 2147516425n, 2147483658n,
+      2147516555n, 9223372036854775947n, 9223372036854808713n, 9223372036854808579n,
+      9223372036854808578n, 9223372036854775936n, 32778n, 9223372039002259466n,
+      9223372039002292353n, 9223372036854808704n, 2147483649n, 9223372039002292232n
+    ];
+    const rotation = [
+      0, 1, 62, 28, 27,
+      36, 44, 6, 55, 20,
+      3, 10, 43, 25, 39,
+      41, 45, 15, 21, 8,
+      18, 2, 61, 56, 14
+    ];
+    const mask64 = (1n << 64n) - 1n;
+
+    function rotl64(value, shift) {
+      const s = BigInt(shift);
+      if (s === 0n) return value & mask64;
+      return ((value << s) | (value >> (64n - s))) & mask64;
+    }
+
+    function keccakF(state) {
+      for (const rc of roundConstants) {
+        const c = new Array(5);
+        const d = new Array(5);
+        for (let x = 0; x < 5; x++) {
+          c[x] = state[x] ^ state[x + 5] ^ state[x + 10] ^ state[x + 15] ^ state[x + 20];
+        }
+        for (let x = 0; x < 5; x++) {
+          d[x] = c[(x + 4) % 5] ^ rotl64(c[(x + 1) % 5], 1);
+        }
+        for (let x = 0; x < 5; x++) {
+          for (let y = 0; y < 5; y++) {
+            state[x + 5 * y] = (state[x + 5 * y] ^ d[x]) & mask64;
+          }
+        }
+
+        const b = new Array(25).fill(0n);
+        for (let x = 0; x < 5; x++) {
+          for (let y = 0; y < 5; y++) {
+            const index = x + 5 * y;
+            const nx = y;
+            const ny = (2 * x + 3 * y) % 5;
+            b[nx + 5 * ny] = rotl64(state[index], rotation[index]);
+          }
+        }
+
+        for (let x = 0; x < 5; x++) {
+          for (let y = 0; y < 5; y++) {
+            state[x + 5 * y] = (b[x + 5 * y] ^ ((~b[((x + 1) % 5) + 5 * y]) & b[((x + 2) % 5) + 5 * y])) & mask64;
+          }
+        }
+
+        state[0] = (state[0] ^ rc) & mask64;
+      }
+    }
+
+    function bytesToLane(bytes, start) {
+      let value = 0n;
+      for (let i = 0; i < 8; i++) {
+        value |= BigInt(bytes[start + i] || 0) << BigInt(8 * i);
+      }
+      return value;
+    }
+
+    function laneToBytes(lane, out, start, limit) {
+      for (let i = 0; i < 8 && start + i < limit; i++) {
+        out[start + i] = Number((lane >> BigInt(8 * i)) & 255n);
+      }
+    }
+
+    function shake256(input, outputLength) {
+      const rate = 136;
+      const state = new Array(25).fill(0n);
+      let offset = 0;
+      while (offset + rate <= input.length) {
+        for (let i = 0; i < rate / 8; i++) {
+          state[i] ^= bytesToLane(input, offset + i * 8);
+        }
+        keccakF(state);
+        offset += rate;
+      }
+
+      const block = new Uint8Array(rate);
+      block.set(input.slice(offset));
+      block[input.length - offset] ^= 0x1f;
+      block[rate - 1] ^= 0x80;
+      for (let i = 0; i < rate / 8; i++) {
+        state[i] ^= bytesToLane(block, i * 8);
+      }
+      keccakF(state);
+
+      const output = new Uint8Array(outputLength);
+      let written = 0;
+      while (written < outputLength) {
+        for (let i = 0; i < rate / 8 && written < outputLength; i++) {
+          laneToBytes(state[i], output, written, outputLength);
+          written += Math.min(8, outputLength - written);
+        }
+        if (written < outputLength) {
+          keccakF(state);
+        }
+      }
+      return output;
+    }
+
+    async function sha256Hex(bytes) {
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      return toHex(new Uint8Array(digest), '');
+    }
+
+    function toHex(bytes, separator = ' ') {
+      return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(separator);
+    }
+
+    function randomHex(bytes) {
+      const out = new Uint8Array(bytes);
+      fillRandom(out);
+      return toHex(out, '');
+    }
+
+    function fillRandom(bytes) {
+      const maxChunk = 65536;
+      for (let offset = 0; offset < bytes.length; offset += maxChunk) {
+        crypto.getRandomValues(bytes.subarray(offset, offset + maxChunk));
+      }
+    }
+
+    function particleId() {
+      return randomHex(16);
+    }
+
+    function setMessage(text, isError = false) {
+      const message = document.getElementById('message');
+      message.textContent = text;
+      message.className = isError ? 'note error' : 'note';
+      document.getElementById('statusText').textContent = isError ? 'Rejected' : 'Ready';
+      if (isError) {
+        document.getElementById('conversionLine').textContent = 'This is what a successful attacker finds.';
+        const button = document.getElementById('runButton');
+        button.classList.remove('generated');
+        button.textContent = 'Generate Entropograph';
+      }
+    }
+
+    function showFileName(file) {
+      const target = document.getElementById('fileName');
+      if (!file) {
+        target.textContent = 'No file selected - using text input';
+        return;
+      }
+      target.textContent = `${file.name} · ${file.size.toLocaleString()} bytes`;
+    }
+
+    async function showPreview(file) {
+      const textarea = document.getElementById('sourceText');
+      const preview = document.getElementById('preview');
+      preview.innerHTML = '';
+
+      if (!file) {
+        preview.classList.remove('active');
+        textarea.style.display = 'block';
+        return;
+      }
+
+      textarea.style.display = 'none';
+      preview.classList.add('active');
+
+      if (file.type.startsWith('image/')) {
+        const image = document.createElement('img');
+        image.alt = file.name;
+        image.src = URL.createObjectURL(file);
+        preview.append(image);
+        return;
+      }
+
+      if (file.type.startsWith('text/') || /\.(txt|json|csv|md|html|css|js|xml|log)$/i.test(file.name)) {
+        const text = await file.text();
+        const pre = document.createElement('pre');
+        pre.textContent = text.slice(0, 12000);
+        preview.append(pre);
+        return;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'file-card';
+      card.innerHTML = `<strong>${file.name}</strong><span>${file.type || 'unknown file type'}</span><span>${file.size.toLocaleString()} bytes</span><span>Binary preview unavailable. The file bytes are still particleized.</span>`;
+      preview.append(card);
+    }
+
+    async function getInputBytes() {
+      const file = droppedFile || document.getElementById('fileInput').files[0];
+      if (file) {
+        return new Uint8Array(await file.arrayBuffer());
+      }
+      return encoder.encode(document.getElementById('sourceText').value);
+    }
+
+    async function generate() {
+      const button = document.getElementById('runButton');
+      button.classList.remove('generated');
+      button.textContent = 'Generating...';
+      const source = await getInputBytes();
+      document.getElementById('inputBytes').textContent = String(source.length);
+      if (source.length > MAX_RECORD_BYTES) {
+        setMessage('Input rejected: 2 MB per-object ceiling.', true);
+        return;
+      }
+
+      const authMaterial = randomHex(32);
+      const authHash = await sha256Hex(encoder.encode(authMaterial));
+      const nonce = randomHex(32);
+      const salt = await sha256Hex(encoder.encode(`${authHash}:${nonce}`));
+      const padded = new Uint8Array(MAX_RECORD_BYTES);
+      padded.set(source);
+      if (source.length < MAX_RECORD_BYTES) {
+        fillRandom(padded.subarray(source.length));
+      }
+
+      const particles = [];
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const shard = padded.slice(i * PARTICLE_BYTES, (i + 1) * PARTICLE_BYTES);
+        const maskInput = encoder.encode(JSON.stringify({
+          domain: 'EDR-MASK-V1',
+          salt,
+          particleIndex: i
+        }));
+        const marker = shake256(maskInput, PARTICLE_BYTES);
+        const particle = new Uint8Array(PARTICLE_BYTES);
+        for (let j = 0; j < PARTICLE_BYTES; j++) {
+          particle[j] = shard[j] ^ marker[j];
+        }
+        particles.push({ id: particleId(), bytes: particle });
+      }
+
+      renderParticles(particles);
+      document.getElementById('particleCount').textContent = String(PARTICLE_COUNT);
+      document.getElementById('statusText').textContent = 'Generated';
+      document.getElementById('conversionLine').textContent = 'Your file has been converted to EDR!';
+      button.classList.add('generated');
+      button.textContent = '[ok] Entropograph Generated';
+      setMessage(`Generated one real Entropograph with ${PARTICLE_COUNT} Entropographic Particles from ${source.length} input bytes.`);
+    }
+
+    function renderParticles(particles) {
+      const target = document.getElementById('particles');
+      target.innerHTML = '';
+      for (const particle of particles.slice(0, SAMPLE_PARTICLES)) {
+        const row = document.createElement('div');
+        row.className = 'particle';
+        const id = document.createElement('div');
+        id.className = 'particle-id';
+        id.textContent = particle.id;
+        const bytes = document.createElement('div');
+        bytes.className = 'particle-bytes';
+        bytes.textContent = `${toHex(particle.bytes.slice(0, PREVIEW_BYTES))} ...`;
+        row.append(id, bytes);
+        target.append(row);
+      }
+    }
+
+    document.getElementById('runButton').addEventListener('click', () => {
+      generate().catch((error) => setMessage(error.message, true));
+    });
+
+    document.getElementById('openAttackModal').addEventListener('click', openAttackModal);
+    document.getElementById('closeAttackModal').addEventListener('click', closeAttackModal);
+    document.getElementById('copyAiPrompt').addEventListener('click', () => {
+      copyAiPrompt().catch((error) => {
+        document.getElementById('copyStatus').textContent = error.message;
+      });
+    });
+    document.getElementById('attackModal').addEventListener('click', (event) => {
+      if (event.target.id === 'attackModal') {
+        closeAttackModal();
+      }
+    });
+
+    document.getElementById('fileInput').addEventListener('change', () => {
+      droppedFile = null;
+      const file = document.getElementById('fileInput').files[0] || null;
+      showFileName(file);
+      showPreview(file).then(generate).catch((error) => setMessage(error.message, true));
+    });
+
+    const drop = document.getElementById('drop');
+
+    drop.addEventListener('dragenter', (event) => {
+      event.preventDefault();
+      drop.classList.add('drag-active');
+    });
+
+    drop.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      drop.classList.add('drag-active');
+    });
+
+    drop.addEventListener('dragleave', (event) => {
+      if (!drop.contains(event.relatedTarget)) {
+        drop.classList.remove('drag-active');
+      }
+    });
+
+    drop.addEventListener('drop', (event) => {
+      event.preventDefault();
+      drop.classList.remove('drag-active');
+      if (event.dataTransfer.files.length) {
+        droppedFile = event.dataTransfer.files[0];
+        showFileName(droppedFile);
+        showPreview(droppedFile).then(generate).catch((error) => setMessage(error.message, true));
+      }
+    });
+
+    showFileName(null);
+  </script>
+</body>
+
+</html>
