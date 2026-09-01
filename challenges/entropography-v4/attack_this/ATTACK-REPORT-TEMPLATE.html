@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Entropography v4 Attack Report</title>
+  <style>
+    :root {
+      --bg: #05080f;
+      --panel: rgba(11, 18, 28, 0.88);
+      --line: rgba(255, 255, 255, 0.18);
+      --text: #f5f7fb;
+      --muted: #c5ccd8;
+      --orange: #ff9f2f;
+      --green: #76d13d;
+      --red: #ff5f57;
+      --code: #101923;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 20%, rgba(0, 98, 255, 0.22), transparent 28%),
+        radial-gradient(circle at 80% 10%, rgba(255, 159, 47, 0.16), transparent 24%),
+        linear-gradient(180deg, #02040a 0%, #07111d 58%, #04070d 100%);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 20px;
+      line-height: 1.55;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 48px 0;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+
+    h1 {
+      color: var(--text);
+      font-size: clamp(2.4rem, 7vw, 5.2rem);
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      color: var(--orange);
+      font-family: Consolas, Monaco, monospace;
+      font-size: 1.45rem;
+      margin-bottom: 14px;
+    }
+
+    h3 {
+      color: var(--green);
+      font-size: 1.15rem;
+      margin: 18px 0 8px;
+    }
+
+    .lede {
+      color: var(--muted);
+      max-width: 72ch;
+      font-size: 1.15rem;
+      margin: 0 0 28px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 18px 0;
+      box-shadow: 0 22px 80px rgba(0, 0, 0, 0.28);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .label {
+      display: block;
+      color: var(--orange);
+      font-family: Consolas, Monaco, monospace;
+      font-size: 0.95rem;
+      margin-bottom: 8px;
+    }
+
+    .value {
+      display: block;
+      color: var(--text);
+      font-size: 1.3rem;
+      font-weight: 700;
+    }
+
+    .success {
+      color: var(--green);
+    }
+
+    .failure {
+      color: var(--red);
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 1.2em;
+    }
+
+    code,
+    pre {
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    pre {
+      overflow-x: auto;
+      white-space: pre-wrap;
+      background: var(--code);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 16px;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 760px) {
+      body {
+        font-size: 18px;
+      }
+
+      main {
+        width: min(100% - 20px, 1120px);
+        padding: 28px 0;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Entropography v4 Attack Report</h1>
+    <p class="lede">Replace every bracketed field before submitting. Keep the report readable by a non-specialist while preserving enough technical detail for review.</p>
+
+    <section class="panel">
+      <h2>Report Metadata</h2>
+      <div class="grid">
+        <div class="metric">
+          <span class="label">Attacker</span>
+          <span class="value">[name, model, team, or handle]</span>
+        </div>
+        <div class="metric">
+          <span class="label">Artifact Hash</span>
+          <span class="value">[SHA-256 of package or commit inspected]</span>
+        </div>
+        <div class="metric">
+          <span class="label">Material Used</span>
+          <span class="value">attack_this/ only</span>
+        </div>
+        <div class="metric">
+          <span class="label">Final Result</span>
+          <span class="value success">[attack failed or attack succeeded]</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Findings</h2>
+      <p>[State what was found in plain language. If nothing was recovered, say that directly. If something was recovered, state exactly what.]</p>
+    </section>
+
+    <section class="panel">
+      <h2>Recovered Bytes Or Fields</h2>
+      <p>[List every recovered byte, field, value, or structural fact. If none, write: None.]</p>
+      <pre>[hex, plaintext, field names, or reproducible output]</pre>
+    </section>
+
+    <section class="panel">
+      <h2>Method Used</h2>
+      <p>[Describe the attack method. Include commands, scripts, statistical tests, source review, reverse engineering, or model-assisted reasoning used.]</p>
+      <pre>[commands or reproducible method]</pre>
+    </section>
+
+    <section class="panel">
+      <h2>Randomness Test</h2>
+      <p>[State whether the public Entropograph was distinguishable from uniform random data with advantage better than guessing.]</p>
+      <ul>
+        <li>Entropy result: [value or not tested]</li>
+        <li>Frequency result: [value or not tested]</li>
+        <li>Correlation result: [value or not tested]</li>
+        <li>Working distinguisher: [yes or no]</li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>Additional Material Required</h2>
+      <p>[If recovery failed, state exactly what additional private material would be required. If recovery succeeded, state what was not needed.]</p>
+    </section>
+
+    <section class="panel">
+      <h2>Final Judgment</h2>
+      <p class="success">[Use this for failed attacks: Attack objective failed. No protected data was recovered.]</p>
+      <p class="failure">[Use this for successful attacks: Attack objective succeeded. Protected material was recovered or a reproducible distinguisher was found.]</p>
+    </section>
+  </main>
+</body>
+</html>

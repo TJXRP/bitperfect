@@ -15,7 +15,7 @@ Artifact: `entropography-v4-attacker-only.zip`
 SHA-256:
 
 ```text
-1F250759E308A50D871B30EC562C6ED6864C9260223F9D79EA5DFE02679CC270
+C780708F8AF8A157611CF6D2DAF4FE2A1E2D404FC3F1C61A91E1D977C0C46A1C
 ```
 
 The challenge package contains the public Entropograph, public metadata, a reconstruction specification, sanitized source for review, and the attack prompt. It does not contain the original record, private anchors, authorization material, recovery nonce, salt, particle mapping, padding metadata, or private verification material.

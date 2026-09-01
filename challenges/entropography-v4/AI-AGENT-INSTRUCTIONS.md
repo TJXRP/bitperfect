@@ -18,7 +18,15 @@ Attack goal:
 Recover any byte, field, or usable value from the original record, or distinguish the public Entropograph from uniform random data with advantage better than guessing.
 ```
 
-Return:
+Return a human-readable HTML report. Use this template:
+
+```text
+attack_this/ATTACK-REPORT-TEMPLATE.html
+```
+
+The report must be complete whether the attack fails or succeeds.
+
+Required sections:
 
 ```text
 Findings

@@ -13,7 +13,7 @@ entropography-v4-attacker-only.zip
 Verify SHA-256:
 
 ```text
-1F250759E308A50D871B30EC562C6ED6864C9260223F9D79EA5DFE02679CC270
+C780708F8AF8A157611CF6D2DAF4FE2A1E2D404FC3F1C61A91E1D977C0C46A1C
 ```
 
 ## AI Agents
@@ -29,6 +29,12 @@ https://github.com/TJXRP/bitperfect/tree/main/challenges/entropography-v4/attack
 Treat `attack_this/` as equivalent to the ZIP contents.
 
 Do not use anything outside `attack_this/` when attempting the challenge.
+
+Return a human-readable HTML report using:
+
+```text
+attack_this/ATTACK-REPORT-TEMPLATE.html
+```
 
 ## Rules
 

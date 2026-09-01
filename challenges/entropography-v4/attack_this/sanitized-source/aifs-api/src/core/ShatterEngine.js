@@ -27,6 +27,22 @@
 const crypto = require('crypto');
 
 class ShatterEngine {
+    // Salt must never default. A public fallback salt turns the mask stream into public data.
+    static requireSalt(salt) {
+        if (Buffer.isBuffer(salt)) {
+            if (salt.length < 32) {
+                throw new Error('salt must contain at least 32 bytes');
+            }
+            return salt.toString('hex');
+        }
+
+        if (typeof salt !== 'string' || salt.trim().length < 64) {
+            throw new Error('salt is required and must contain at least 256 bits of entropy');
+        }
+
+        return salt;
+    }
+
     static maskStream(particleIndex, length, salt) {
         if (!Number.isInteger(particleIndex) || particleIndex < 0) {
             throw new Error('particleIndex must be a non-negative integer');
@@ -37,10 +53,11 @@ class ShatterEngine {
         if (length === 0) {
             return Buffer.alloc(0);
         }
+        const saltText = ShatterEngine.requireSalt(salt);
 
         const input = Buffer.from(JSON.stringify({
             domain: 'EDR-MASK-V1',
-            salt: String(salt),
+            salt: saltText,
             particleIndex
         }), 'utf8');
 
@@ -61,7 +78,8 @@ class ShatterEngine {
      * it with a concrete - particulate physical state - No 
      * coherent file structure survives this process
      */
-    static shatter(data, salt = "SOVEREIGN_AIFS_2026") {
+    static shatter(data, salt) {
+        const saltText = ShatterEngine.requireSalt(salt);
         // I process the input as a raw bitstream - I do not care 
         // for file types or high-level semantics - I operate 
         // at the level of digital truth
@@ -88,7 +106,7 @@ class ShatterEngine {
             // size - This masks the actual byte-length of the 
             // original signal - an essential requirement of the 
             // ZPK protocol
-            const filler = crypto.createHash('sha256').update(`ENTROPY-FILLER-${i}-${salt}`).digest();
+            const filler = crypto.createHash('sha256').update(`ENTROPY-FILLER-${i}-${saltText}`).digest();
 
             if (start >= buffer.length) {
                 // If the signal is smaller than the 1,024-particle 
@@ -113,7 +131,7 @@ class ShatterEngine {
                 // salt to the particle - This is Patent Claim 1 
                 // in action - It turns the data into noise that 
                 // can only be unmasked by the sovereign owner
-                const marker = ShatterEngine.maskStream(i, shard.length, salt);
+                const marker = ShatterEngine.maskStream(i, shard.length, saltText);
                 const markedShard = Buffer.alloc(shard.length);
                 
                 // I - TJ - selected XOR because it is a primitive 
@@ -147,13 +165,14 @@ class ShatterEngine {
      * fulfills the zero-persistent-knowledge technical 
      * requirement
      */
-    static rejoin(shards, originalLength, salt = "SOVEREIGN_AIFS_2026") {
+    static rejoin(shards, originalLength, salt) {
+        const saltText = ShatterEngine.requireSalt(salt);
         const unmaskedShards = shards.map((markedShard, i) => {
             // I reconstruct the exact mask for this specific 
             // particle - The sequence must be identical to the 
             // creation event - I - TJ - do not permit 
             // mathematical drift
-            const marker = ShatterEngine.maskStream(i, markedShard.length, salt);
+            const marker = ShatterEngine.maskStream(i, markedShard.length, saltText);
             const unmasked = Buffer.alloc(markedShard.length);
             
             // Reversing the ZPK Forensics Mask reveals the raw bits - 

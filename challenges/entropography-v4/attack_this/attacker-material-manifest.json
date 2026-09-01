@@ -15,7 +15,8 @@
     "failure-lane-outcomes.json",
     "attacker-material-manifest.json",
     "RECONSTRUCTION-SPEC.md",
-    "ATTACK-PROMPT.txt"
+    "ATTACK-PROMPT.txt",
+    "ATTACK-REPORT-TEMPLATE.html"
   ],
   "excluded_from_this_bundle": [
     "the original object",
