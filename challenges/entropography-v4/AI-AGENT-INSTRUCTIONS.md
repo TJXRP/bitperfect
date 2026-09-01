@@ -32,7 +32,7 @@ If your environment cannot publish files, return a downloadable HTML file artifa
 results/entropography-v4/
 ```
 
-The report must be complete whether the attack fails or succeeds.
+The report must be complete for either outcome: no recovery achieved, or recovery achieved.
 
 Required sections:
 

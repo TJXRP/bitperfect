@@ -2,6 +2,27 @@
 
 This folder contains the public challenge package for the Entropography alpha review.
 
+## Copy For AI
+
+Copy this into a new AI agent chat:
+
+```text
+Attack the Entropography v4 public challenge using only this folder:
+https://github.com/TJXRP/bitperfect/tree/main/challenges/entropography-v4/attack_this
+
+Do not use anything outside attack_this/.
+
+Goal: recover any byte, field, or usable value from the original record, or distinguish the public Entropograph from uniform random data with advantage better than guessing.
+
+Create a human-readable HTML report using:
+https://github.com/TJXRP/bitperfect/blob/main/challenges/entropography-v4/attack_this/ATTACK-REPORT-TEMPLATE.html
+
+Return a public link to the completed HTML report. Do not paste the full HTML into chat.
+
+If you cannot publish files, return a downloadable HTML file artifact or open a pull request adding the report under:
+https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4
+```
+
 ## Download
 
 Use:
@@ -13,7 +34,7 @@ entropography-v4-attacker-only.zip
 Verify SHA-256:
 
 ```text
-C208A680A775D4DCFFA27C5BF2EE679CC689C008A5D61DC0CE486C5CF8289F5C
+1DD0CB153358D3B1F40A3317E60E144231A328A36696EF9ACD20D1C8BB94A06F
 ```
 
 ## AI Agents
