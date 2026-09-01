@@ -1,0 +1,14 @@
+﻿{
+    "challenge_name":  "Entropography alpha adversarial review, version 4",
+    "dataset_id":  "object-001",
+    "dataset_label":  "public Entropograph",
+    "public_particle_folder":  "entropograph",
+    "particle_count":  1024,
+    "particle_bytes_each":  128,
+    "proof_substrate":  "local-edr-alpha",
+    "blockchain_anchor":  false,
+    "merkle_root_commitment":  "9c055a3f4cac84ac5e06a359f4dbc5cda989f57731e5b84f769457b4f3d325bb",
+    "merkle_root_note":  "Internal commitment value. It is not verifiable from public material alone.",
+    "raw_source_hash":  "withheld until challenge close",
+    "defender_verification_assertions":  "withheld until challenge close"
+}

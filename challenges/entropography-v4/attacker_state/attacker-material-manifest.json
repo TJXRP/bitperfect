@@ -1,0 +1,69 @@
+{
+  "challenge_name": "Entropography alpha adversarial review, version 4",
+  "object_id": "object-001",
+  "public_entropograph_folder": "entropograph",
+  "public_particle_count": 1024,
+  "public_particle_bytes_each": 128,
+  "public_entropograph_bytes": 131072,
+  "merkle_root_commitment": "9c055a3f4cac84ac5e06a359f4dbc5cda989f57731e5b84f769457b4f3d325bb",
+  "merkle_root_is_outsider_reproducible": false,
+  "salted_prelaunch_commitment": "e582a9eb05b45ba9119a5d8cdd7ef1ece3e7646eafd50c936179009084137cda",
+  "attacker_visible_files": [
+    "entropograph/",
+    "public-manifest.json",
+    "prelaunch-commitment.json",
+    "internal-commitments.json",
+    "failure-lane-outcomes.json",
+    "attacker-material-manifest.json",
+    "RECONSTRUCTION-SPEC.md",
+    "ATTACK-PROMPT.txt"
+  ],
+  "excluded_from_this_bundle": [
+    "the original object",
+    "the raw hash of the original object",
+    "the random secret salt",
+    "private anchors",
+    "authorization material",
+    "the recovery nonce",
+    "salt binding material",
+    "the private inclusion filter",
+    "the particle index mapping",
+    "padding metadata",
+    "reconstruction authorization material",
+    "operator verification assertions"
+  ],
+  "sample_public_particle_digests": [
+    {
+      "public_id": "0019baea7bc806e3e7afdf960648c3eb",
+      "sha256": "2ed5476e49c2739ee69728ddf51768197cd2cf58c7a293284d2c3395cecbb736"
+    },
+    {
+      "public_id": "001b926799acfe3a4818f19c66c81735",
+      "sha256": "d7039ecdc691757cc41863e95a10b750a2a760feec528069ea437e076ad02503"
+    },
+    {
+      "public_id": "003484a9b16ca400ffd0e37c0f009c8c",
+      "sha256": "726ed1e0886fd3f69d04c3b318b3a273f02b4723fb0137df7b620bdf93258050"
+    },
+    {
+      "public_id": "004bfce83d613aae557a23929d416a1b",
+      "sha256": "0a4ccbe243e0ac7bbf362e0dc414c30b3d8d52ee921108d3cd57fce92c226c5d"
+    },
+    {
+      "public_id": "00871cfc1ec72c49e866d97267ea8ac2",
+      "sha256": "24350b75363fb896d8f9a9fac41b5e4df8d81b638999992b81f77bfd1ce67443"
+    },
+    {
+      "public_id": "00ac942c7f9d618e95b8977370b70d71",
+      "sha256": "ec841fb68b02e50d08dffedbeff2a0209d2220a4bee4131b99a9f29fa95d3800"
+    },
+    {
+      "public_id": "015cac38a27a9b8b0914bf051bd0ae39",
+      "sha256": "e09e8bb8733aff827a4cbb75a3bc48b2ec46df054755947d9b0a1132a1b3849e"
+    },
+    {
+      "public_id": "018a19ff429b931d7bcf98d863ec8bc1",
+      "sha256": "8762e22687b33d095a489b3a879091759739a660991004f99128d8094ad62386"
+    }
+  ]
+}

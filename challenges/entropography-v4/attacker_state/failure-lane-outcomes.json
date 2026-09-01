@@ -1,0 +1,45 @@
+{
+  "description": "Failure lane outcomes recorded with the run. The verifier and private material are not included in attacker state.",
+  "outcomes": [
+    {
+      "lane": "missing_particle",
+      "result": "rejected",
+      "reason": "particle_count_mismatch"
+    },
+    {
+      "lane": "partial_dataset",
+      "result": "rejected",
+      "reason": "incomplete_particle_set"
+    },
+    {
+      "lane": "replay_attempt",
+      "result": "not_executed_in_public_challenge",
+      "reason": "requires_stateful_runtime_policy"
+    },
+    {
+      "lane": "stale_authorization",
+      "result": "not_executed_in_public_challenge",
+      "reason": "requires_live_authorization_policy"
+    },
+    {
+      "lane": "tampered_particle",
+      "result": "rejected",
+      "reason": "hash_mismatch"
+    },
+    {
+      "lane": "wrong_anchor",
+      "result": "rejected",
+      "reason": "anchor_verification_failed"
+    },
+    {
+      "lane": "wrong_auth",
+      "result": "rejected",
+      "reason": "hash_mismatch"
+    },
+    {
+      "lane": "wrong_merkle_root",
+      "result": "rejected",
+      "reason": "merkle_root_mismatch"
+    }
+  ]
+}

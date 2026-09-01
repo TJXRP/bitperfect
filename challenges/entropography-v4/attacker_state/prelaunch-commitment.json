@@ -1,0 +1,6 @@
+{
+  "commitment": "e582a9eb05b45ba9119a5d8cdd7ef1ece3e7646eafd50c936179009084137cda",
+  "construction": "SHA256(random_secret_salt || exact_target_bytes)",
+  "salt_status": "withheld until challenge close",
+  "target_status": "withheld until challenge close"
+}
