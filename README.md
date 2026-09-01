@@ -15,7 +15,7 @@ Artifact: `entropography-v4-attacker-only.zip`
 SHA-256:
 
 ```text
-58BBD22460EC510D01449B564D16FD2DC78FF68C1BFA34980E4763F4ADA6982C
+EF4CBC72E859242256E96EFC1D63689878302020F79D0D87990EA9B9B451A3D9
 ```
 
 The attacker package contains the public Entropograph, public metadata, a reconstruction specification, sanitized source for review, and the attack prompt. It does not contain the original record, private anchors, authorization material, recovery nonce, salt, particle mapping, padding metadata, or private verification material.

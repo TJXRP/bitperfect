@@ -12,7 +12,6 @@
     "entropograph/",
     "public-manifest.json",
     "prelaunch-commitment.json",
-    "internal-commitments.json",
     "failure-lane-outcomes.json",
     "attacker-material-manifest.json",
     "RECONSTRUCTION-SPEC.md",
