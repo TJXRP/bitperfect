@@ -16,6 +16,14 @@ Verify SHA-256:
 1F250759E308A50D871B30EC562C6ED6864C9260223F9D79EA5DFE02679CC270
 ```
 
+## AI Agents
+
+If your environment cannot unzip files, use the expanded `attack_this/` folder directly.
+
+Treat `attack_this/` as equivalent to the ZIP contents.
+
+Do not use anything outside `attack_this/` when attempting the challenge.
+
 ## Rules
 
 Use only the material inside `attack_this`.
@@ -31,8 +39,6 @@ The package includes the public Entropograph, public metadata, the review specif
 Entropographic Particle files are hex text encodings. Each particle decodes to 128 bytes.
 
 The package does not include the original record, private anchors, authorization material, recovery nonce, secret salt, particle order mapping, padding metadata, or private verification material.
-
-AI agents that cannot unzip files should use the expanded `attack_this/` folder directly. Treat `attack_this/` as equivalent to the ZIP contents.
 
 ## Report Format
 
