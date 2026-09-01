@@ -18,10 +18,18 @@ Attack goal:
 Recover any byte, field, or usable value from the original record, or distinguish the public Entropograph from uniform random data with advantage better than guessing.
 ```
 
-Return a human-readable HTML report. Use this template:
+Create a human-readable HTML report using this template:
 
 ```text
 attack_this/ATTACK-REPORT-TEMPLATE.html
+```
+
+Return a public link to the completed HTML report. Do not paste the full HTML into chat.
+
+If your environment cannot publish files, return a downloadable HTML file artifact or open a pull request adding the report under:
+
+```text
+results/entropography-v4/
 ```
 
 The report must be complete whether the attack fails or succeeds.

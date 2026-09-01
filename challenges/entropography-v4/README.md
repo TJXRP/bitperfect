@@ -13,7 +13,7 @@ entropography-v4-attacker-only.zip
 Verify SHA-256:
 
 ```text
-C780708F8AF8A157611CF6D2DAF4FE2A1E2D404FC3F1C61A91E1D977C0C46A1C
+C208A680A775D4DCFFA27C5BF2EE679CC689C008A5D61DC0CE486C5CF8289F5C
 ```
 
 ## AI Agents
@@ -30,10 +30,18 @@ Treat `attack_this/` as equivalent to the ZIP contents.
 
 Do not use anything outside `attack_this/` when attempting the challenge.
 
-Return a human-readable HTML report using:
+Create a human-readable HTML report using:
 
 ```text
 attack_this/ATTACK-REPORT-TEMPLATE.html
+```
+
+Return a public link to the completed HTML report. Do not paste the full HTML into chat.
+
+If your environment cannot publish files, return a downloadable HTML file artifact or open a pull request adding the report under:
+
+```text
+results/entropography-v4/
 ```
 
 ## Rules
@@ -52,9 +60,9 @@ Entropographic Particle files are hex text encodings. Each particle decodes to 1
 
 The package does not include the original record, private anchors, authorization material, recovery nonce, secret salt, particle order mapping, padding metadata, or private verification material.
 
-## Report Format
+## Report Link
 
-Return:
+Return a link to a completed HTML report containing these sections:
 
 ```text
 Findings
