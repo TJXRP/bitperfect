@@ -1,0 +1,1144 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Post-Quantum Holy Grail</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <!-- PostHog product analytics. Approved cookie / localStorage exception.
+       Runs only on the live bitperfect.dev domain. -->
+  <script>
+    (function () {
+      var h = location.hostname;
+      if (h !== 'bitperfect.dev' && h !== 'www.bitperfect.dev') return;
+      !function(t,e){var o,n,p,r;e.__SV||(window.posthog && window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}p||((p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",p.onerror=function(){p=null},(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r));var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],Object.defineProperty(u,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e}}),Object.defineProperty(u.people,"toString",{configurable:!0,enumerable:!0,writable:!0,value:function(){return u.toString(1)+".people (stub)"}}),o="nu su ou au hu init Fu Ou Ru Au Nu za Pu ju Mu Uu Wu Vu capture getExtension $u iu Ju calculateEventProperties Zu register register_once register_for_session unregister unregister_for_session Yu Eu Qu getFeatureFlag getFeatureFlagPayload getFeatureFlagResult getAllFeatureFlags isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync th identify setPersonProperties unsetPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset eh shutdown setIdentity clearIdentity get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException addExceptionStep captureLog startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty Ku zu createPersonProfile setInternalOrTestUser Xu du vu opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing Bu debug Ua Ts getPageViewId captureTraceFeedback captureTraceMetric Su".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+      posthog.init('phc_CbvDSjb44E7W2m3pf2EtSDtWUV5rxg3paQTdEG5cu3AD', {
+        api_host: 'https://us.i.posthog.com',
+        defaults: '2026-05-30',
+        person_profiles: 'identified_only'
+      });
+    })();
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ---- page shell: matches edr-eval-walkthrough.html -------------------- */
+    body {
+      min-height: 100vh;
+      color: #e8edf5;
+      background-color: #101828;
+      font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 16pt;
+      line-height: 1.5;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -25%;
+      width: 150%;
+      height: 150%;
+      background: url("assets/backgrounds/earthrise.png") center center / cover no-repeat;
+      transform: scale(1.4) rotate(22deg);
+      transform-origin: center center;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.92;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(7, 11, 18, 0.16), rgba(7, 11, 18, 0.16)),
+        radial-gradient(ellipse at 60% 30%, transparent 40%, rgba(10, 12, 20, 0.35) 100%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    #star-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    /* ---- layout: mobile first ------------------------------------------- */
+    main {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px 16px 44px;
+    }
+
+    .page-title {
+      font-size: clamp(1rem, 4.4vw, 1.75rem);
+      font-weight: 700;
+      line-height: 1.3;
+      color: #f8fafc;
+      text-align: center;
+      margin: 8px auto 22px;
+      white-space: nowrap;
+    }
+
+    @media (min-width: 700px) {
+      .page-title {
+        font-size: 1.75rem;
+        margin-bottom: 28px;
+      }
+    }
+
+    @media (min-width: 700px) {
+      main {
+        width: 92%;
+        max-width: 1000px;
+        padding: 32px 0 64px;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      main {
+        max-width: 1120px;
+      }
+    }
+
+    /* ---- intro cards: collapsible rows (white panels, teal accents) ------- */
+    .intro-card {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .intro-block {
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .intro-head {
+      list-style: none;
+      cursor: pointer;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .intro-head::-webkit-details-marker {
+      display: none;
+    }
+
+    .intro-kicker {
+      font-size: 16pt;
+      font-weight: 700;
+      font-family: inherit;
+    }
+
+    .intro-block.problem .intro-kicker {
+      color: #0284c7;
+    }
+
+    .intro-block.timeline .intro-kicker {
+      color: #c2410c;
+    }
+
+    .intro-block.pqc .intro-kicker {
+      color: #0f766e;
+    }
+
+    .intro-text {
+      font-size: 16pt;
+      color: #0f172a;
+      line-height: 1.4;
+      padding: 0 20px 18px;
+    }
+
+    .intro-text i {
+      font-style: italic;
+    }
+
+    /* the checkmark is the toggle control */
+    .intro-check {
+      flex-shrink: 0;
+      align-self: center;
+      font-size: clamp(26px, 5.5vw, 48px);
+      line-height: 1;
+      font-weight: 700;
+      color: #76b900;
+      cursor: pointer;
+      user-select: none;
+      transition: opacity 0.15s ease;
+    }
+
+    .intro-head:hover .intro-check {
+      opacity: 0.7;
+    }
+
+    .quiz-lead-in {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #f8fafc;
+      text-align: center;
+      margin: 4px auto 20px;
+    }
+
+    @media (min-width: 700px) {
+      .quiz-lead-in {
+        font-size: 1.4rem;
+        margin-bottom: 24px;
+      }
+    }
+
+    /* ====================================================================
+       Quiz question + answer + feedback formatting (NVIDIA green & orange)
+       ==================================================================== */
+    .quiz-container {
+      --bg-surface: #1b2740;
+      --bg-surface-hover: #26365a;
+      --border-color: #33456b;
+      --text-primary: #f8fafc;
+      --text-secondary: #a9b6cc;
+      --accent-primary: #76b900;
+      --accent-glow: rgba(118, 185, 0, 0.12);
+      --accent-secondary: #ff6b00;
+      --orange-glow: rgba(255, 107, 0, 0.12);
+      --color-success: #76b900;
+      --bg-success-glow: rgba(118, 185, 0, 0.08);
+      --color-error: #ff3b30;
+      --bg-error-glow: rgba(255, 59, 48, 0.1);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --transition-smooth: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 22px 18px;
+      box-shadow: 0 25px 50px -20px rgba(0, 0, 0, 0.7);
+      position: relative;
+      color: var(--text-primary);
+    }
+
+    @media (min-width: 700px) {
+      .quiz-container {
+        padding: 36px;
+      }
+    }
+
+    .quiz-container::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: 10%;
+      width: 80%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-primary), var(--accent-secondary), transparent);
+    }
+
+    .quiz-header {
+      margin-bottom: 32px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .category-badge {
+      background-color: var(--accent-primary);
+      color: #ffffff;
+      border: 1px solid var(--accent-primary);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .progress-text {
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .progress-text strong {
+      color: var(--accent-primary);
+    }
+
+    .progress-bar-container {
+      background-color: var(--border-color);
+      height: 5px;
+      width: 100%;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      background: linear-gradient(90deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .question-section {
+      margin-bottom: 32px;
+    }
+
+    .question-text {
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.45;
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    @media (min-width: 700px) {
+      .question-text {
+        font-size: 1.4rem;
+      }
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    @media (min-width: 700px) {
+      .options-grid {
+        gap: 12px;
+      }
+    }
+
+    .option-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      text-align: left;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      width: 100%;
+      outline: none;
+      font-family: inherit;
+      color: var(--text-primary);
+    }
+
+    .option-card:not(:disabled):hover {
+      background-color: var(--bg-surface-hover);
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 15px var(--accent-glow);
+    }
+
+    .option-marker {
+      background-color: var(--border-color);
+      color: var(--text-secondary);
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1rem;
+      margin-right: 16px;
+      flex-shrink: 0;
+      transition: var(--transition-smooth);
+    }
+
+    .option-card:not(:disabled):hover .option-marker {
+      background-color: var(--accent-primary);
+      color: #000000;
+    }
+
+    .option-label {
+      font-size: 15pt;
+      font-weight: 500;
+      color: var(--text-primary);
+      flex-grow: 1;
+      line-height: 1.4;
+    }
+
+    .status-icon {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-left: 12px;
+    }
+
+    .option-card.is-correct {
+      background-color: var(--bg-success-glow);
+      border-color: var(--color-success);
+    }
+
+    .option-card.is-correct .option-marker {
+      background-color: var(--color-success);
+      color: #000;
+    }
+
+    .option-card.is-correct .option-label {
+      color: var(--color-success);
+      font-weight: 600;
+    }
+
+    .option-card.is-correct .status-icon {
+      color: var(--color-success);
+    }
+
+    .option-card.is-incorrect {
+      background-color: var(--bg-error-glow);
+      border-color: var(--color-error);
+    }
+
+    .option-card.is-incorrect .option-marker {
+      background-color: var(--color-error);
+      color: var(--text-primary);
+    }
+
+    .option-card.is-incorrect .option-label {
+      color: var(--color-error);
+      font-weight: 600;
+    }
+
+    .option-card.is-incorrect .status-icon {
+      color: var(--color-error);
+    }
+
+    .option-card:disabled {
+      cursor: not-allowed;
+    }
+
+    .option-card:disabled:not(.is-correct):not(.is-incorrect) {
+      opacity: 0.35;
+    }
+
+    @media (min-width: 700px) {
+      .option-card {
+        padding: 16px 20px;
+      }
+    }
+
+    .feedback-panel {
+      display: none;
+      background-color: #141d33;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      margin-top: 24px;
+      animation: slideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .feedback-panel.visible {
+      display: block;
+    }
+
+    .feedback-badge {
+      display: inline-block;
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+    }
+
+    .feedback-badge.success {
+      background-color: var(--bg-success-glow);
+      color: var(--accent-primary);
+      border: 1px solid rgba(118, 185, 0, 0.2);
+    }
+
+    .feedback-badge.error {
+      background-color: var(--bg-error-glow);
+      color: var(--color-error);
+      border: 1px solid rgba(255, 59, 48, 0.2);
+    }
+
+    .feedback-text {
+      font-size: 15pt;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .feedback-text p {
+      margin-bottom: 12px;
+    }
+
+    .feedback-text p:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .feedback-text .k {
+      display: inline-block;
+      min-width: 92px;
+      color: var(--accent-primary);
+      font-weight: 700;
+      vertical-align: top;
+    }
+
+    .feedback-text i {
+      font-style: italic;
+    }
+
+    .status-chip {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .status-chip.done {
+      color: var(--accent-primary);
+      border-color: rgba(118, 185, 0, 0.35);
+      background: var(--bg-success-glow);
+    }
+
+    .status-chip.partial {
+      color: var(--accent-secondary);
+      border-color: rgba(255, 107, 0, 0.35);
+      background: var(--orange-glow);
+    }
+
+    .next-btn {
+      background: linear-gradient(135deg, var(--accent-primary) 0%, #528200 100%);
+      color: #000000;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 14px 28px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      width: 100%;
+      transition: var(--transition-smooth);
+    }
+
+    .next-btn:hover {
+      box-shadow: 0 0 20px rgba(118, 185, 0, 0.35);
+      transform: translateY(-1px);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ---- results view (inside the quiz card) ----------------------------- */
+    .results {
+      display: none;
+    }
+
+    .results.visible {
+      display: block;
+    }
+
+    .results h2 {
+      font-size: 1.4rem;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .results .summary {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .score-cols {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 640px) {
+      .score-cols {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .score-cols .col {
+      background-color: #141d33;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .score-cols h3 {
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 10px;
+    }
+
+    .score-cols .done h3 {
+      color: var(--accent-primary);
+    }
+
+    .score-cols .not h3 {
+      color: var(--accent-secondary);
+    }
+
+    .score-cols ul {
+      list-style: none;
+    }
+
+    .score-cols li {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+      margin-bottom: 8px;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .score-cols li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .score-cols .done li::before {
+      background: var(--accent-primary);
+    }
+
+    .score-cols .not li::before {
+      background: var(--accent-secondary);
+    }
+
+    .closing-note {
+      font-size: 1rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      border-top: 1px solid var(--border-color);
+      padding-top: 16px;
+      margin-bottom: 20px;
+    }
+
+    .closing-note strong {
+      color: var(--text-primary);
+    }
+
+    .closing-note i {
+      font-style: italic;
+    }
+
+    /* ---- sources: edr-eval style (white code-box) ---------------------- */
+    .code-box {
+      margin-top: 20px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 16px 20px;
+      color: #0f172a;
+      font-size: 16pt;
+      line-height: 1.5;
+    }
+
+    .code-box h4 {
+      margin-bottom: 10px;
+      font-size: 16pt;
+      font-family: inherit;
+      color: #0f766e;
+    }
+
+    .code-box ol {
+      padding-left: 22px;
+    }
+
+    .code-box li {
+      margin-bottom: 6px;
+      color: #334155;
+    }
+
+    .code-box i {
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="star-canvas"></canvas>
+
+  <main>
+    <h1 class="page-title">People with passion can change the world</h1>
+
+    <div class="intro-card">
+      <details class="intro-block problem" open>
+        <summary class="intro-head">
+          <span class="intro-kicker">The Quantum Threat</span>
+          <span class="intro-check" aria-hidden="true">&#10003;</span>
+        </summary>
+        <div class="intro-text">In a "harvest now, decrypt later" (HNDL) attack, adversaries steal and store your
+          encrypted data today, waiting for future quantum computers to decrypt the entire archive at once.</div>
+      </details>
+      <details class="intro-block timeline" open>
+        <summary class="intro-head">
+          <span class="intro-kicker">How long do we have?</span>
+          <span class="intro-check" aria-hidden="true">&#10003;</span>
+        </summary>
+        <div class="intro-text">2030. Standard estimates span 2030 to 2040, see sources below.</div>
+      </details>
+      <details class="intro-block pqc" open>
+        <summary class="intro-head">
+          <span class="intro-kicker">Is Post Quantum Cryptography Enough?</span>
+          <span class="intro-check" aria-hidden="true">&#10003;</span>
+        </summary>
+        <div class="intro-text">No. PQC still relies on the same vulnerable structure: static
+          ciphertext protected by a hard(er) math problem.</div>
+      </details>
+    </div>
+
+    <p class="quiz-lead-in">Is Entropic Dispersal and Reassembly (EDR)&trade; a solution?<br> Find out by taking this
+      short quiz</p>
+
+    <div class="quiz-container">
+      <div id="quiz-view">
+        <div class="quiz-header">
+          <div class="progress-meta">
+            <span class="category-badge" id="cat">The Quantum threat</span>
+            <span class="progress-text">Question <strong id="qn">1</strong> of 10 &nbsp;&middot;&nbsp; Score <strong
+                id="sc">0</strong></span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="bar" style="width:0"></div>
+          </div>
+        </div>
+
+        <div class="question-section">
+          <p class="question-text" id="qtext"></p>
+        </div>
+
+        <div class="options-grid" id="opts"></div>
+
+        <div class="feedback-panel" id="fb">
+          <span class="feedback-badge" id="fbbadge"></span>
+          <div class="feedback-text" id="fbtext"></div>
+          <button class="next-btn" id="next">Next</button>
+        </div>
+      </div>
+
+      <div class="results" id="results-view">
+        <h2 id="rtitle"></h2>
+        <p class="summary" id="rsummary"></p>
+        <div class="score-cols">
+          <div class="col done">
+            <h3>Demonstrated or basically complete</h3>
+            <ul>
+              <li>EDR: persistent plaintext and durable ciphertext exposure pushed as close to zero as operationally
+                possible</li>
+              <li>EDR: no conventional ciphertext object to harvest</li>
+              <li>EDR: no master decryption key to steal</li>
+              <li>EDR: no single stored particle reveals the data</li>
+              <li>EDR: bit-perfect authorized reassembly</li>
+              <li>EDR: hash and Merkle integrity verification</li>
+              <li>EDR: transient, memory-only reassembly</li>
+              <li>EDR: selective disclosure and reconstruction rate limiting</li>
+              <li>EDR: provenance through anchors, commitments, hashes, evidence artifacts</li>
+              <li>Mem<i>O</i>(1)&trade;: deterministic bit-perfect recall at scale. Adjacent capability, a separate
+                product from EDR</li>
+            </ul>
+          </div>
+          <div class="col not">
+            <h3>Not claimed</h3>
+            <ul>
+              <li>A formal information-theoretic confidentiality proof</li>
+              <li>Secure computation that never exposes the underlying data to the computation itself</li>
+              <li>Formally proven quantum-independent security. Removing the ciphertext and key is promising, not a
+                proof</li>
+              <li>Security after every secret is known to the attacker. A different, much stronger threat model</li>
+              <li>Mapped and tested compliance against PQC or regulatory standards</li>
+              <li>Hardware-observed retrieval on real silicon. Pre-silicon has passed; KV260 board validation is next
+              </li>
+              <li>A mathematical impossibility proof for target recovery. Adversarial testing has recovered no target
+                bytes so far, which is strong evidence, not a proof</li>
+            </ul>
+          </div>
+        </div>
+        <div class="closing-note">
+          <p>EDR is <strong>Entropic Dispersal and Reassembly</strong>. It uses entropic dispersal, not encryption.
+            Canonical claim: Entropic Dispersal is designed to push persistent plaintext and durable ciphertext exposure
+            as close to zero as operationally possible.</p>
+          <p>For a quantum-era threat model the point is simpler: there is <strong>no conventional ciphertext to harvest
+              and no master key to recover</strong>, so harvest now, decrypt later has nothing to act on. That is an
+            argument, not a theorem. The architecture does not claim to be unbreakable; it claims to contain the blast
+            radius of a breach.</p>
+        </div>
+        <button class="next-btn" id="restart">Start over</button>
+      </div>
+    </div>
+
+    <div class="code-box">
+      <h4>Sources</h4>
+      <ol>
+        <li>NIST, Post-Quantum Cryptography FIPS approved: FIPS 203 ML-KEM, 204 ML-DSA, 205 SLH-DSA, 13 Aug 2024. HQC
+          selected as backup KEM, 11 Mar 2025.</li>
+        <li>Palo Alto Networks, Keyfactor, The Quantum Insider: Harvest Now, Decrypt Later explainers, 2025 to 2026.
+        </li>
+        <li>Quantum resource estimates for RSA-2048 reduced from about 20M to under 1M qubits, papers May 2025 to Mar
+          2026.</li>
+        <li>NSA CNSA 2.0 FAQ. NSA, NCSC, and BSI positions declining to recommend QKD, citing no authentication,
+          distance limits, and cost.</li>
+        <li>Shamir, How to Share a Secret, 1979. Krawczyk, Secret Sharing Made Short, 1993. Resch and Plank, AONT-RS,
+          USENIX FAST 2011.</li>
+        <li>Homomorphic encryption overhead: roughly 2.5 s to encrypt 1 KB, 4.8 s per encrypted operation, about 5x
+          ciphertext expansion. 2025 to 2026 surveys.</li>
+        <li>TEE.Fail side-channel attack extracting secrets from Intel SGX and TDX and AMD SEV-SNP DDR5 enclaves with a
+          sub-1000 dollar interposer, Oct 2025.</li>
+        <li>EDR figures: internal benchmark and adversarial-test artifacts, including the attacker-only package.
+          Mem<i>O</i>(1)&trade; is a separate product.</li>
+      </ol>
+    </div>
+  </main>
+
+  <script>
+    var Q = [
+      {
+        cat: "The threat",
+        q: "An adversary copies your encrypted database today but cannot read it. Why is that already a serious problem?",
+        options: [
+          "AES-256 is quantum-resistant, so an encrypted database stays safe.",
+          "They store it now and decrypt the whole archive later, once a quantum computer can break today's public-key encryption.",
+          "The copy goes stale as records change, so old encrypted data has little value."
+        ],
+        correct: 1,
+        why: "Harvest now, decrypt later. RSA and elliptic-curve encryption fall to Shor's algorithm. Mosca's test: if secrecy years (X) plus migration years (Y) exceed years to a capable quantum computer (Z), today's data is already exposed.",
+        gap: "Encryption in transit and at rest keeps data unreadable now. It does nothing about a copy an adversary holds for years until the math becomes doable.",
+        edr: "Entropic Dispersal leaves no durable ciphertext object to copy, so there is nothing to stockpile.",
+        status: ["done", "no ciphertext target to harvest, basically complete"]
+      },
+      {
+        cat: "Post-quantum cryptography",
+        q: "The new NIST post-quantum standards, ML-KEM and ML-DSA, are rolling out. Do they remove the harvest-now-decrypt-later risk for data you already store?",
+        options: [
+          "Yes. Post-quantum encrypted data cannot be harvested.",
+          "No. You still store an encrypted blob that can be captured, still hold keys, and the new hardness is assumed, not proven.",
+          "Only for data encrypted after the upgrade; anything older stays at risk but that is a small window."
+        ],
+        correct: 1,
+        why: "PQC (FIPS 203, 204, 205 in 2024; HQC backup in 2025) is necessary for new traffic, but it keeps the lock-and-key shape.",
+        gap: "PQC swaps RSA and ECC for algorithms believed to resist quantum attack. It still leaves a ciphertext at rest and keys to manage, and the new hardness is assumed, not proven, as the finalist SIKE showed when it fell on a laptop in 2022.",
+        edr: "EDR does not swap one hard problem for another. It stores no conventional ciphertext and no master key, so there is nothing standard for Shor's algorithm to target.",
+        status: ["done", "no master decryption key, basically complete"]
+      },
+      {
+        cat: "Keys",
+        q: "Your encryption keys are generated on demand and never written to disk. Does that protect data an adversary harvests today?",
+        options: [
+          "Yes. With no stored key, there is nothing for a future attacker to recover.",
+          "No. If the harvested traffic used RSA or elliptic-curve key exchange, a quantum computer recovers the session key from the ciphertext itself, however the key was stored.",
+          "Only if the keys are also longer than 4096 bits."
+        ],
+        correct: 1,
+        why: "Ephemeral and HSM-derived keys are good practice, but Shor's algorithm attacks the captured RSA or ECC handshake, not your keystore. The key's storage never mattered to the harvester.",
+        gap: "Key rotation, HSMs, and ephemeral keys protect the key store. They do nothing for a captured RSA or ECC handshake, from which a quantum computer derives the key directly.",
+        edr: "EDR keeps no conventional ciphertext and no long-lived master key at rest. What is needed to reassemble is gathered at request time from separately held authorization material, with no RSA or ECC artifact for Shor to target.",
+        status: ["done", "no master decryption key, basically complete"]
+      },
+      {
+        cat: "Plaintext at rest",
+        q: "What most reduces what an attacker who images your disk can actually read?",
+        options: [
+          "Full-disk encryption with a strong passphrase.",
+          "Never writing the complete original to durable storage at all.",
+          "Rotating and shredding logs on a short schedule."
+        ],
+        correct: 1,
+        why: "If the whole original is never persisted, a disk image has little to read, key or no key.",
+        gap: "Full-disk and at-rest encryption keep a powered-off disk unreadable. They expose plaintext whenever the volume is mounted, with the key on the same machine.",
+        edr: "Entropic Dispersal pushes persistent plaintext and durable ciphertext exposure as close to zero as operationally possible. Minimized, not eliminated.",
+        status: ["done", "basically complete"]
+      },
+      {
+        cat: "No ciphertext to harvest",
+        q: "Harvesting needs a fixed encrypted object to copy and keep. What defeats that directly?",
+        options: [
+          "Encrypting twice with two different algorithms.",
+          "Not persisting conventional ciphertext, so there is no thing to harvest.",
+          "Splitting the ciphertext across two data centers."
+        ],
+        correct: 1,
+        why: "Layered encryption and sharding still leave a ciphertext at rest. The archive fills; the attacker waits.",
+        gap: "Encryption, classical or post-quantum, turns data into a ciphertext blob. That blob can be copied whole and decrypted later.",
+        edr: "EDR disperses data into high-entropy particles. No single stored object is the protected data in captured form.",
+        status: ["done", "no ciphertext target to harvest, basically complete"]
+      },
+      {
+        cat: "Dispersal",
+        q: "Secret sharing and dispersed storage split data into fragments. Is EDR the same idea renamed?",
+        options: [
+          "Yes, it is the same mechanism with different branding.",
+          "Related, not the same. EDR is a productized dispersal system with operational controls, per-record reassembly, extraction rate limiting, built-in integrity, provenance, that primitives like Shamir and AONT-RS do not provide on their own.",
+          "No, because secret sharing is broken by quantum computers."
+        ],
+        correct: 1,
+        why: "Shamir (1979) and AONT dispersal (AONT-RS, Krawczyk) are real, respected, and unaffected by Shor's algorithm; they rest on information theory, not number theory. Dispersal is a sound direction.",
+        gap: "Threshold secret sharing splits data into fragments with a real information-theoretic proof. It gives you no selective per-record retrieval, rate limiting, integrity, or provenance; you build those.",
+        edr: "EDR packages dispersal with those controls plus addressed retrieval, so recall is not an O(n) scan of fragments. Its raw confidentiality argument is not stronger than Shamir's, and it does not claim to be.",
+        status: ["done", "no single stored object reveals data, basically complete"]
+      },
+      {
+        cat: "Integrity",
+        q: "How do you know the data you got back was not altered while it was dispersed?",
+        options: [
+          "You cannot; dispersed fragments are unverifiable.",
+          "Hash and Merkle verification over the reassembled result.",
+          "Compare the file size before and after."
+        ],
+        correct: 1,
+        why: "Particles can be corrupted or swapped. Hashing the result against a committed Merkle root catches any change.",
+        gap: "Encryption hides the contents. It does not tell you whether the data was altered while stored.",
+        edr: "EDR runs hash and Merkle verification on every reassembly.",
+        status: ["done", "demonstrated"]
+      },
+      {
+        cat: "Transient reassembly",
+        q: "When authorized data is rebuilt, where does the complete original live?",
+        options: [
+          "It is written back to disk so it can be reused quickly.",
+          "It is held transiently in memory for use, then gone; the persistent store still has no complete original.",
+          "It is kept in an encrypted cache with a short time-to-live."
+        ],
+        correct: 1,
+        why: "If reassembly persisted the plaintext, you would be back to plaintext at rest.",
+        gap: "Trusted execution environments process data in an isolated enclave. The plaintext still exists there, and enclaves keep falling to side-channel attacks; TEE.Fail pulled keys from Intel SGX, TDX, and AMD SEV-SNP in Oct 2025 for under 1000 dollars.",
+        edr: "EDR reassembly materializes transiently rather than persisting the target.",
+        status: ["done", "basically complete"]
+      },
+      {
+        cat: "Blast radius",
+        q: "A valid credential is stolen, and separately an auditor needs three specific records out of millions. What should the system do?",
+        options: [
+          "Give the auditor a full decrypt, and treat the stolen credential as full access.",
+          "Reassemble only the three records, and cap how much any credential can reconstruct over time.",
+          "Require a second approver only for exports above a set size."
+        ],
+        correct: 1,
+        why: "All-or-nothing decryption over-shares with the auditor and hands a thief everything.",
+        gap: "An encrypted store gives one credential all-or-nothing access. A stolen credential means the whole corpus, at full speed.",
+        edr: "EDR reassembles specific records on authorization and applies a configurable extraction limit, so a breach leaks a trickle, not the vault. It does not claim to be unbreakable; it contains the blast radius of a breach.",
+        status: ["done", "basically complete"]
+      },
+      {
+        cat: "The honest ceiling",
+        q: "Which of these does EDR actually claim today?",
+        options: [
+          "A proof that recovery from stored state is impossible, and formally proven quantum-independent security.",
+          "Plaintext and ciphertext exposure minimized as far as operationally possible, bit-perfect audited reassembly, and no target bytes recovered in adversarial testing so far. Evidence, not proof.",
+          "Certification against post-quantum and regulatory standards."
+        ],
+        correct: 1,
+        why: "Concrete claims only: no master key, minimized plaintext and ciphertext exposure, audited bit-perfect reassembly, and an attacker package where no target bytes have come out yet.",
+        gap: "The honest limits: no formal information-theoretic proof, no proven quantum-independent security, no secure computation, no mapped regulatory compliance. Hardware retrieval is proven pre-silicon; KV260 board validation is next.",
+        edr: "No conventional ciphertext or key means a quantum attack has nothing standard to target. An argument for the threat model, held to measured evidence.",
+        status: ["partial", "strong evidence and active hardware validation, not a formal proof"]
+      }
+    ];
+
+    var idx = 0, score = 0, answered = false;
+    var el = function (id) { return document.getElementById(id); };
+    var quizView = el("quiz-view"), resultsView = el("results-view");
+    var LETTERS = ["A", "B", "C", "D"];
+
+    function esc(s) {
+      return String(s).replace(/[&<>]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c];
+      });
+    }
+    // run after esc(): swap plain brand tokens for their intended markup
+    function brand(s) {
+      return s
+        .replace(/MemO\(1s\)/g, "MemO(1<sub>s</sub>)")
+        .replace(/MemO\(1\)/g, "Mem<i>O</i>(1)&trade;");
+    }
+
+    function render() {
+      answered = false;
+      var item = Q[idx];
+      el("cat").textContent = item.cat;
+      el("qn").textContent = String(idx + 1);
+      el("sc").textContent = String(score);
+      el("bar").style.width = (idx / Q.length * 100) + "%";
+      el("qtext").textContent = item.q;
+
+      var grid = el("opts");
+      grid.innerHTML = "";
+      item.options.forEach(function (text, i) {
+        var b = document.createElement("button");
+        b.className = "option-card";
+        b.type = "button";
+        b.innerHTML =
+          "<span class='option-marker'>" + LETTERS[i] + "</span>" +
+          "<span class='option-label'>" + esc(text) + "</span>" +
+          "<span class='status-icon'></span>";
+        b.addEventListener("click", function () { choose(i); });
+        grid.appendChild(b);
+      });
+
+      el("fb").classList.remove("visible");
+      el("next").textContent = (idx === Q.length - 1) ? "See results" : "Next";
+    }
+
+    function choose(i) {
+      if (answered) return;
+      answered = true;
+      var item = Q[idx];
+      var cards = el("opts").querySelectorAll(".option-card");
+      cards.forEach(function (c, j) {
+        c.disabled = true;
+        var icon = c.querySelector(".status-icon");
+        if (j === item.correct) { c.classList.add("is-correct"); icon.textContent = "✓"; }
+        if (j === i && j !== item.correct) { c.classList.add("is-incorrect"); icon.textContent = "✗"; }
+      });
+
+      var isRight = (i === item.correct);
+      if (isRight) score++;
+      el("sc").textContent = String(score);
+
+      var badge = el("fbbadge");
+      badge.className = "feedback-badge " + (isRight ? "success" : "error");
+      badge.textContent = isRight ? "Correct" : "Not quite - here is the correct answer.";
+
+      el("fbtext").innerHTML =
+        "<p><span class='k'>Why</span> " + brand(esc(item.why)) + "</p>" +
+        "<p><span class='k'>Today</span> " + brand(esc(item.gap)) + "</p>" +
+        "<p><span class='k'>EDR</span> " + brand(esc(item.edr)) + "</p>" +
+        "<span class='status-chip " + item.status[0] + "'>" + esc(item.status[1]) + "</span>";
+
+      el("fb").classList.add("visible");
+      el("next").focus();
+    }
+
+    el("next").addEventListener("click", function () {
+      if (!answered) return;
+      if (idx < Q.length - 1) {
+        idx++;
+        render();
+        document.querySelector(".quiz-container").scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        finish();
+      }
+    });
+
+    function finish() {
+      quizView.style.display = "none";
+      resultsView.classList.add("visible");
+      el("bar").style.width = "100%";
+      el("rtitle").innerHTML = brand("Where EDR stands");
+      el("rsummary").textContent =
+        "You answered " + score + " of " + Q.length + " correctly. The point is not the score. A real quantum-era solution has to satisfy every property above, and most tools satisfy only a few.";
+      document.querySelector(".quiz-container").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    el("restart").addEventListener("click", function () {
+      idx = 0; score = 0;
+      resultsView.classList.remove("visible");
+      quizView.style.display = "block";
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    render();
+
+    // Meteor canvas animation, forefront meteors only. From edr-eval-walkthrough.html.
+    (function initMeteors() {
+      var canvas = document.getElementById("star-canvas");
+      if (!canvas) return;
+      var ctx = canvas.getContext("2d");
+      var w = (canvas.width = window.innerWidth);
+      var h = (canvas.height = window.innerHeight);
+
+      window.addEventListener("resize", function () {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+
+      var meteors = [];
+      function createMeteor() {
+        return {
+          x: Math.random() * w * 1.2,
+          y: Math.random() * (h * 0.4) - 100,
+          length: Math.random() * 90 + 40,
+          speed: Math.random() * 4 + 2.5,
+          angle: Math.PI / 4,
+          alpha: 0.45,
+          width: Math.random() * 1.4 + 0.8
+        };
+      }
+
+      for (var k = 0; k < 2; k++) {
+        var m = createMeteor();
+        m.y = Math.random() * h * 0.6;
+        meteors.push(m);
+      }
+
+      function frame() {
+        ctx.clearRect(0, 0, w, h);
+        if (meteors.length < 3 && Math.random() < 0.01) meteors.push(createMeteor());
+        for (var j = meteors.length - 1; j >= 0; j--) {
+          var meteor = meteors[j];
+          var tailX = meteor.x - Math.cos(meteor.angle) * meteor.length;
+          var tailY = meteor.y - Math.sin(meteor.angle) * meteor.length;
+          var grad = ctx.createLinearGradient(meteor.x, meteor.y, tailX, tailY);
+          grad.addColorStop(0, "rgba(255, 255, 255, " + meteor.alpha + ")");
+          grad.addColorStop(0.25, "rgba(140, 193, 193, " + (meteor.alpha * 0.85) + ")");
+          grad.addColorStop(1, "rgba(140, 193, 193, 0)");
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = meteor.width;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(meteor.x, meteor.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.stroke();
+          meteor.x += Math.cos(meteor.angle) * meteor.speed;
+          meteor.y += Math.sin(meteor.angle) * meteor.speed;
+          if (meteor.x > w + 200 || meteor.y > h + 200) meteors.splice(j, 1);
+        }
+        requestAnimationFrame(frame);
+      }
+      frame();
+    })();
+  </script>
+</body>
+
+</html>
