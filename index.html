@@ -560,10 +560,9 @@
         </p>
       </div>
       <nav class="actions" aria-label="Challenge links">
-        <button id="openAttackModal" class="button green" type="button">Challenge: Hack EDR!</button>
-        <a class="button secondary" href="edr-eval-walkthrough.html" id="openWalkthroughBtn">EDR Evaluation Walkthrough →</a>
-        <a class="button secondary" href="challenges/entropography-v4/attack_this/RECONSTRUCTION-SPEC.md"
-          download>Download EDR Spec Sheet ↓</a>
+        <button class="button green" type="button" disabled></button>
+        <button class="button secondary" type="button" disabled></button>
+        <button class="button secondary" type="button" disabled></button>
       </nav>
     </header>
 
@@ -635,44 +634,6 @@
       </div>
     </section>
   </main>
-
-  <div id="attackModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="attackModalTitle">
-    <div class="modal">
-      <div class="modal-head">
-        <h2 id="attackModalTitle" class="modal-title">Challenge: Hack EDR!</h2>
-        <button id="closeAttackModal" class="modal-close" type="button" aria-label="Close">x</button>
-      </div>
-      <ul class="modal-list">
-        <li>Open the reproducible public challenge package.</li>
-        <li>Use any tools, models, scripts, or compute you want, but the only thing you can hack is inside our
-          `attack_this/` folder.</li>
-        <li>The goal is to recover hidden data or find a reproducible distinguisher.</li>
-        <li>Reproducible. Run it yourself. A failed attack is not a proof of security.</li>
-        <li>The final answer must be a link to a completed HTML report.</li>
-      </ul>
-      <textarea id="aiPrompt" class="copy-box" readonly>Attack the Entropography v4 public challenge using only this folder:
-https://github.com/TJXRP/bitperfect/tree/main/challenges/entropography-v4/attack_this
-
-Use any tools, models, scripts, or compute you want, but the only thing you can hack is inside our "attack_this/" folder.
-
-Goal: recover any byte, field, or usable value from the original record, or distinguish the public Entropograph from uniform random data with advantage better than guessing.
-
-Create a human-readable HTML report using:
-https://github.com/TJXRP/bitperfect/blob/main/challenges/entropography-v4/attack_this/ATTACK-REPORT-TEMPLATE.html
-
-Return a public link to the completed HTML report. Do not paste the full HTML into chat.
-
-If you cannot publish files, return a downloadable HTML file artifact or open a pull request adding the report under:
-https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea>
-      <div class="actions">
-        <button id="copyAiPrompt" class="button green" type="button">Copy Challenge Prompt</button>
-        <a class="button green"
-          href="https://github.com/TJXRP/bitperfect/tree/main/challenges/entropography-v4/attack_this" target="_blank"
-          rel="noopener">Open Attack Folder ↗</a>
-      </div>
-      <p id="copyStatus" class="note copy-status" aria-live="polite"></p>
-    </div>
-  </div>
 
   <script>
     (function () {
@@ -825,22 +786,6 @@ https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea
     const encoder = new TextEncoder();
     const sessionNonces = new Set(); // this-tab-only uniqueness check, illustration only
     let droppedFile = null;
-
-    function openAttackModal() {
-      document.getElementById('attackModal').classList.add('open');
-    }
-
-    function closeAttackModal() {
-      document.getElementById('attackModal').classList.remove('open');
-    }
-
-    async function copyAiPrompt() {
-      const prompt = document.getElementById('aiPrompt');
-      prompt.select();
-      prompt.setSelectionRange(0, prompt.value.length);
-      await navigator.clipboard.writeText(prompt.value);
-      document.getElementById('copyStatus').textContent = 'Copied AI prompt and attack folder link.';
-    }
 
     function toHex(bytes, separator = ' ') {
       return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(separator);
@@ -1119,19 +1064,6 @@ https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea
 
     document.getElementById('runButton').addEventListener('click', () => {
       generate().catch((error) => setMessage(error.message, true));
-    });
-
-    document.getElementById('openAttackModal').addEventListener('click', openAttackModal);
-    document.getElementById('closeAttackModal').addEventListener('click', closeAttackModal);
-    document.getElementById('copyAiPrompt').addEventListener('click', () => {
-      copyAiPrompt().catch((error) => {
-        document.getElementById('copyStatus').textContent = error.message;
-      });
-    });
-    document.getElementById('attackModal').addEventListener('click', (event) => {
-      if (event.target.id === 'attackModal') {
-        closeAttackModal();
-      }
     });
 
     document.getElementById('fileInput').addEventListener('change', () => {
