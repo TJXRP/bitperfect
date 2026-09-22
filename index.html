@@ -552,10 +552,10 @@
     <header>
       <div>
         <h1>Entropic Dispersal and Reassembly&trade; (EDR) v2.1</h1>
-        <p class="protocol-line">A Distributed Trust Data Protocol. No single breach reveals your data.</p>
-        <p class="tagline">EDR splits a record into 1,024 masked particles across separate protected domains.
-          Reconstruction requires the particle store, private anchors, authorization, and recovery nonce material.
-          Breach all but one domain and get noise.</p>
+        <p class="protocol-line">A local, exact-or-nothing data protection protocol. No single piece reveals your data.</p>
+        <p class="tagline">EDR encrypts a record, then splits it into 1,024 particles. Every particle and the
+          matching anchor are required to get anything back, and the result is the exact original or nothing.
+          The key never leaves this browser tab.</p>
         <p class="note">At reconstruction, everything converges in RAM only. That moment still has to be protected.
         </p>
       </div>
@@ -580,9 +580,9 @@
         </div>
         <div class="input-controls">
           <button id="runButton" class="button" type="button">Generate Entropograph</button>
-          <p id="message" class="note">Browser illustration: 2 MB per object, 1,024 particles, 2,048 bytes each.
-            Processing stays in this browser tab. The public review package uses the fixed 128 KiB profile documented
-            in the spec.</p>
+          <p id="message" class="note">Browser illustration: up to 2 MB per object, 1,024 particles, particle size
+            scales with your input. Processing and the key stay in this browser tab. The public review package uses
+            the fixed 128 KiB profile documented in the spec.</p>
         </div>
         <div class="preview-wrap">
           <textarea id="sourceText"
@@ -615,7 +615,7 @@
           </div>
           <div class="metric">
             <span class="label">Particle Size</span>
-            <span class="value">2,048 bytes</span>
+            <span id="particleSize" class="value">depends on input</span>
           </div>
           <div class="metric">
             <span class="label">Input Bytes</span>
@@ -626,7 +626,7 @@
             <span id="statusText" class="value green">Ready</span>
           </div>
         </div>
-        <h2 class="attack-surface-title">Masked particles (multiple auth & anchors unlock these)</h2>
+        <h2 class="attack-surface-title">Encrypted particles (the key and the anchor unlock these)</h2>
         <div id="particles" class="particles" aria-live="polite">
           <div class="empty-state">Generate an Entropograph to reveal the particles.</div>
         </div>
@@ -796,12 +796,34 @@ https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea
       animate();
     })();
 
+    /*
+     * Browser illustration of the EDR-CORE-V2.1 construction: AES-256-GCM encryption,
+     * a key-derivation step, an all-or-nothing package transform, a key-commitment
+     * prefix, and a split into fixed-size particles whose size scales with the input.
+     * This runs the same construction as the reviewed core, but it is not the
+     * reviewed pipeline itself: the real core requires a durable, locked,
+     * cross-process nonce registry that a browser tab cannot provide. Here, nonce
+     * uniqueness is only checked for this page session. The key is generated fresh
+     * per run, stays in memory in this tab, and is never shown, stored, or sent
+     * anywhere.
+     */
+    const VERSION = 'EDR-CORE-V2.1';
     const PARTICLE_COUNT = 1024;
-    const PARTICLE_BYTES = 2048;
-    const MAX_RECORD_BYTES = PARTICLE_COUNT * PARTICLE_BYTES;
+    const MIN_PARTICLE_BYTES = 128;
+    const AES_BLOCK = 16;
+    const GCM_IV_BYTES = 12;
+    const GCM_TAG_BYTES = 16;
+    const NONCE_BYTES = 32;
+    const COMMIT_BYTES = 32;
+    const LEN_PREFIX_BYTES = 4;
+    const AONT_TRAILER_BYTES = 32;
+    const MAX_INPUT_BYTES = 2 * 1024 * 1024;
     const SAMPLE_PARTICLES = 32;
     const PREVIEW_BYTES = 160;
+    const ANCHOR_FIELDS = ['version', 'record_id', 'nonce', 'iv', 'generation', 'created_at',
+      'particle_count', 'particle_bytes', 'labels', 'particle_sha256'];
     const encoder = new TextEncoder();
+    const sessionNonces = new Set(); // this-tab-only uniqueness check, illustration only
     let droppedFile = null;
 
     function openAttackModal() {
@@ -820,126 +842,8 @@ https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea
       document.getElementById('copyStatus').textContent = 'Copied AI prompt and attack folder link.';
     }
 
-    const roundConstants = [
-      1n, 32898n, 9223372036854808714n, 9223372039002292224n, 32907n, 2147483649n,
-      9223372039002292353n, 9223372036854808585n, 138n, 136n, 2147516425n, 2147483658n,
-      2147516555n, 9223372036854775947n, 9223372036854808713n, 9223372036854808579n,
-      9223372036854808578n, 9223372036854775936n, 32778n, 9223372039002259466n,
-      9223372039002292353n, 9223372036854808704n, 2147483649n, 9223372039002292232n
-    ];
-    const rotation = [
-      0, 1, 62, 28, 27,
-      36, 44, 6, 55, 20,
-      3, 10, 43, 25, 39,
-      41, 45, 15, 21, 8,
-      18, 2, 61, 56, 14
-    ];
-    const mask64 = (1n << 64n) - 1n;
-
-    function rotl64(value, shift) {
-      const s = BigInt(shift);
-      if (s === 0n) return value & mask64;
-      return ((value << s) | (value >> (64n - s))) & mask64;
-    }
-
-    function keccakF(state) {
-      for (const rc of roundConstants) {
-        const c = new Array(5);
-        const d = new Array(5);
-        for (let x = 0; x < 5; x++) {
-          c[x] = state[x] ^ state[x + 5] ^ state[x + 10] ^ state[x + 15] ^ state[x + 20];
-        }
-        for (let x = 0; x < 5; x++) {
-          d[x] = c[(x + 4) % 5] ^ rotl64(c[(x + 1) % 5], 1);
-        }
-        for (let x = 0; x < 5; x++) {
-          for (let y = 0; y < 5; y++) {
-            state[x + 5 * y] = (state[x + 5 * y] ^ d[x]) & mask64;
-          }
-        }
-
-        const b = new Array(25).fill(0n);
-        for (let x = 0; x < 5; x++) {
-          for (let y = 0; y < 5; y++) {
-            const index = x + 5 * y;
-            const nx = y;
-            const ny = (2 * x + 3 * y) % 5;
-            b[nx + 5 * ny] = rotl64(state[index], rotation[index]);
-          }
-        }
-
-        for (let x = 0; x < 5; x++) {
-          for (let y = 0; y < 5; y++) {
-            state[x + 5 * y] = (b[x + 5 * y] ^ ((~b[((x + 1) % 5) + 5 * y]) & b[((x + 2) % 5) + 5 * y])) & mask64;
-          }
-        }
-
-        state[0] = (state[0] ^ rc) & mask64;
-      }
-    }
-
-    function bytesToLane(bytes, start) {
-      let value = 0n;
-      for (let i = 0; i < 8; i++) {
-        value |= BigInt(bytes[start + i] || 0) << BigInt(8 * i);
-      }
-      return value;
-    }
-
-    function laneToBytes(lane, out, start, limit) {
-      for (let i = 0; i < 8 && start + i < limit; i++) {
-        out[start + i] = Number((lane >> BigInt(8 * i)) & 255n);
-      }
-    }
-
-    function shake256(input, outputLength) {
-      const rate = 136;
-      const state = new Array(25).fill(0n);
-      let offset = 0;
-      while (offset + rate <= input.length) {
-        for (let i = 0; i < rate / 8; i++) {
-          state[i] ^= bytesToLane(input, offset + i * 8);
-        }
-        keccakF(state);
-        offset += rate;
-      }
-
-      const block = new Uint8Array(rate);
-      block.set(input.slice(offset));
-      block[input.length - offset] ^= 0x1f;
-      block[rate - 1] ^= 0x80;
-      for (let i = 0; i < rate / 8; i++) {
-        state[i] ^= bytesToLane(block, i * 8);
-      }
-      keccakF(state);
-
-      const output = new Uint8Array(outputLength);
-      let written = 0;
-      while (written < outputLength) {
-        for (let i = 0; i < rate / 8 && written < outputLength; i++) {
-          laneToBytes(state[i], output, written, outputLength);
-          written += Math.min(8, outputLength - written);
-        }
-        if (written < outputLength) {
-          keccakF(state);
-        }
-      }
-      return output;
-    }
-
-    async function sha256Hex(bytes) {
-      const digest = await crypto.subtle.digest('SHA-256', bytes);
-      return toHex(new Uint8Array(digest), '');
-    }
-
     function toHex(bytes, separator = ' ') {
       return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join(separator);
-    }
-
-    function randomHex(bytes) {
-      const out = new Uint8Array(bytes);
-      fillRandom(out);
-      return toHex(out, '');
     }
 
     function fillRandom(bytes) {
@@ -949,8 +853,89 @@ https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea
       }
     }
 
+    function randomBytes(n) {
+      const out = new Uint8Array(n);
+      fillRandom(out);
+      return out;
+    }
+
+    function randomHex(bytes) {
+      return toHex(randomBytes(bytes), '');
+    }
+
     function particleId() {
       return randomHex(16);
+    }
+
+    function concatBytes(...arrays) {
+      const total = arrays.reduce((n, a) => n + a.length, 0);
+      const out = new Uint8Array(total);
+      let offset = 0;
+      for (const a of arrays) { out.set(a, offset); offset += a.length; }
+      return out;
+    }
+
+    async function sha256Bytes(bytes) {
+      return new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+    }
+
+    async function sha256Hex(bytes) {
+      return toHex(await sha256Bytes(bytes), '');
+    }
+
+    // Canonical JSON over the anchor fields. Same encoder input on generation as a
+    // reader would produce, so the same bytes are what get authenticated.
+    function canonicalJson(value) {
+      if (value === null) return 'null';
+      const t = typeof value;
+      if (t === 'string') return JSON.stringify(value);
+      if (t === 'boolean') return value ? 'true' : 'false';
+      if (t === 'number') {
+        if (!Number.isFinite(value)) throw new Error('non-finite number');
+        if (Object.is(value, -0)) return '0';
+        return JSON.stringify(value);
+      }
+      if (Array.isArray(value)) return `[${value.map(canonicalJson).join(',')}]`;
+      if (t === 'object') {
+        const keys = Object.keys(value).sort();
+        return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalJson(value[k])}`).join(',')}}`;
+      }
+      throw new Error(`unsupported value type ${t}`);
+    }
+
+    function buildAad(anchor) {
+      const obj = {};
+      for (const f of ANCHOR_FIELDS) obj[f] = anchor[f];
+      return encoder.encode(`${VERSION}/aad:${canonicalJson(obj)}`);
+    }
+
+    // Particle size grows or shrinks with the input, same as the reviewed core; it
+    // is never a fixed number.
+    function planSizes(plaintextLen, particleCount) {
+      const overhead = COMMIT_BYTES + LEN_PREFIX_BYTES + GCM_TAG_BYTES + AONT_TRAILER_BYTES;
+      let pb = Math.ceil((plaintextLen + overhead) / particleCount);
+      pb = Math.ceil(pb / AES_BLOCK) * AES_BLOCK;
+      pb = Math.max(MIN_PARTICLE_BYTES, pb);
+      const total = pb * particleCount;
+      const bodyLen = total - GCM_TAG_BYTES - AONT_TRAILER_BYTES;
+      const paddingLen = bodyLen - COMMIT_BYTES - LEN_PREFIX_BYTES - plaintextLen;
+      if (paddingLen < 0 || bodyLen % AES_BLOCK !== 0) throw new Error('size plan failed');
+      return { particleBytes: pb, total, bodyLen, paddingLen };
+    }
+
+    // All-or-nothing package transform: encrypt the ciphertext+tag under a fresh
+    // random key, then hide that key inside a trailer that only comes apart once
+    // every byte of the transformed output is present.
+    async function packageTransform(input) {
+      if (input.length % AES_BLOCK !== 0) throw new Error('package transform input must be a multiple of 16 bytes');
+      const kPrime = randomBytes(32);
+      const kPrimeKey = await crypto.subtle.importKey('raw', kPrime, { name: 'AES-CTR' }, false, ['encrypt']);
+      const counter = new Uint8Array(16);
+      const pseudo = new Uint8Array(await crypto.subtle.encrypt({ name: 'AES-CTR', counter, length: 128 }, kPrimeKey, input));
+      const h = await sha256Bytes(concatBytes(encoder.encode(`${VERSION}/aont`), pseudo));
+      const trailer = new Uint8Array(32);
+      for (let i = 0; i < 32; i++) trailer[i] = kPrime[i] ^ h[i];
+      return concatBytes(pseudo, trailer);
     }
 
     function setMessage(text, isError = false) {
@@ -1025,44 +1010,76 @@ https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea
       button.textContent = 'Generating...';
       const source = await getInputBytes();
       document.getElementById('inputBytes').textContent = String(source.length);
-      if (source.length > MAX_RECORD_BYTES) {
+      if (source.length > MAX_INPUT_BYTES) {
         setMessage('Input rejected: 2 MB per-object ceiling.', true);
         return;
       }
 
-      const authMaterial = randomHex(32);
-      const authHash = await sha256Hex(encoder.encode(authMaterial));
-      const nonce = randomHex(32);
-      const salt = await sha256Hex(encoder.encode(`${authHash}:${nonce}`));
-      const padded = new Uint8Array(MAX_RECORD_BYTES);
-      padded.set(source);
-      if (source.length < MAX_RECORD_BYTES) {
-        fillRandom(padded.subarray(source.length));
+      // A fresh key, nonce, and IV every run. Nothing here is ever displayed, stored,
+      // or sent off this page.
+      const authMaterial = randomBytes(32);
+      const nonce = randomBytes(NONCE_BYTES);
+      const nonceHex = toHex(nonce, '');
+      if (sessionNonces.has(nonceHex)) {
+        setMessage('Nonce collision in this tab, generating again.', true);
+        return;
+      }
+      sessionNonces.add(nonceHex);
+      const iv = randomBytes(GCM_IV_BYTES);
+      const recordId = `demo-${randomHex(8)}`;
+      const generation = 1;
+      const createdAt = Date.now();
+      const labels = {};
+
+      const sizes = planSizes(source.length, PARTICLE_COUNT);
+
+      const lenPrefix = new Uint8Array(LEN_PREFIX_BYTES);
+      new DataView(lenPrefix.buffer).setUint32(0, source.length, false);
+      const commitValue = new Uint8Array(COMMIT_BYTES); // zero prefix, checked again on any real reconstruction
+      const padding = randomBytes(sizes.paddingLen);
+      const body = concatBytes(commitValue, lenPrefix, source, padding);
+
+      // Derive the one-time encryption key from the auth material and the nonce.
+      const hkdfKey = await crypto.subtle.importKey('raw', authMaterial, { name: 'HKDF' }, false, ['deriveBits']);
+      const info = concatBytes(encoder.encode(`${VERSION}/keys/`), encoder.encode(recordId));
+      const encKeyBytes = new Uint8Array(await crypto.subtle.deriveBits(
+        { name: 'HKDF', hash: 'SHA-256', salt: nonce, info }, hkdfKey, 256
+      ));
+
+      const anchorForAad = {
+        version: VERSION, record_id: recordId, nonce: nonceHex, iv: toHex(iv, ''),
+        generation, created_at: createdAt, particle_count: PARTICLE_COUNT,
+        particle_bytes: sizes.particleBytes, labels, particle_sha256: []
+      };
+      const aad = buildAad(anchorForAad);
+
+      const gcmKey = await crypto.subtle.importKey('raw', encKeyBytes, { name: 'AES-GCM' }, false, ['encrypt']);
+      const ctWithTag = new Uint8Array(await crypto.subtle.encrypt(
+        { name: 'AES-GCM', iv, additionalData: aad, tagLength: GCM_TAG_BYTES * 8 }, gcmKey, body
+      ));
+
+      const packaged = await packageTransform(ctWithTag);
+      if (packaged.length !== sizes.total) {
+        setMessage('Internal size check failed. Try again.', true);
+        return;
       }
 
       const particles = [];
       for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const shard = padded.slice(i * PARTICLE_BYTES, (i + 1) * PARTICLE_BYTES);
-        const maskInput = encoder.encode(JSON.stringify({
-          domain: 'EDR-MASK-V2.1',
-          salt,
-          particleIndex: i
-        }));
-        const marker = shake256(maskInput, PARTICLE_BYTES);
-        const particle = new Uint8Array(PARTICLE_BYTES);
-        for (let j = 0; j < PARTICLE_BYTES; j++) {
-          particle[j] = shard[j] ^ marker[j];
-        }
-        particles.push({ id: particleId(), bytes: particle });
+        particles.push({
+          id: particleId(),
+          bytes: packaged.slice(i * sizes.particleBytes, (i + 1) * sizes.particleBytes)
+        });
       }
 
       renderParticles(particles);
       document.getElementById('particleCount').textContent = String(PARTICLE_COUNT);
+      document.getElementById('particleSize').textContent = `${sizes.particleBytes.toLocaleString()} bytes`;
       document.getElementById('statusText').textContent = 'Generated';
       document.getElementById('conversionLine').textContent = 'Your file has been converted to EDR!';
       button.classList.add('generated');
       button.textContent = '[ok] Entropograph Generated';
-      setMessage(`Generated one real Entropograph with ${PARTICLE_COUNT} Entropographic Particles from ${source.length} input bytes.`);
+      setMessage(`Encrypted, transformed, and split into ${PARTICLE_COUNT} particles of ${sizes.particleBytes.toLocaleString()} bytes each, from ${source.length.toLocaleString()} input bytes. The key stays in this browser tab and is never shown or stored.`);
     }
 
     function renderParticles(particles) {
