@@ -1064,12 +1064,22 @@ https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea
         return;
       }
 
+      // record_anchor_ref: one public reference id shared by every particle from this
+      // record, the same field the real public particle export uses to point back to
+      // the anchor without exposing the record id itself.
+      const recordAnchorRef = randomHex(16);
       const particles = [];
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         particles.push({
-          id: particleId(),
+          particle_id: particleId(),
+          record_anchor_ref: recordAnchorRef,
           bytes: packaged.slice(i * sizes.particleBytes, (i + 1) * sizes.particleBytes)
         });
+      }
+      // particle_sha256 is computed for the sampled particles actually shown, the
+      // same field every particle carries in the real public export.
+      for (const particle of particles.slice(0, SAMPLE_PARTICLES)) {
+        particle.particle_sha256 = await sha256Hex(particle.bytes);
       }
 
       renderParticles(particles);
@@ -1082,19 +1092,27 @@ https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea
       setMessage(`Encrypted, transformed, and split into ${PARTICLE_COUNT} particles of ${sizes.particleBytes.toLocaleString()} bytes each, from ${source.length.toLocaleString()} input bytes. The key stays in this browser tab and is never shown or stored.`);
     }
 
+    // Renders each sampled particle in the same shape the real public particle
+    // export uses: particle_id, record_anchor_ref, particle_sha256, hex.
     function renderParticles(particles) {
       const target = document.getElementById('particles');
       target.innerHTML = '';
       for (const particle of particles.slice(0, SAMPLE_PARTICLES)) {
         const row = document.createElement('div');
         row.className = 'particle';
-        const id = document.createElement('div');
-        id.className = 'particle-id';
-        id.textContent = particle.id;
-        const bytes = document.createElement('div');
-        bytes.className = 'particle-bytes';
-        bytes.textContent = `${toHex(particle.bytes.slice(0, PREVIEW_BYTES))} ...`;
-        row.append(id, bytes);
+        const particleIdLine = document.createElement('div');
+        particleIdLine.className = 'particle-id';
+        particleIdLine.textContent = `particle_id: ${particle.particle_id}`;
+        const anchorRef = document.createElement('div');
+        anchorRef.className = 'particle-id';
+        anchorRef.textContent = `record_anchor_ref: ${particle.record_anchor_ref}`;
+        const hash = document.createElement('div');
+        hash.className = 'particle-bytes';
+        hash.textContent = `particle_sha256: ${particle.particle_sha256}`;
+        const hex = document.createElement('div');
+        hex.className = 'particle-bytes';
+        hex.textContent = `hex: ${toHex(particle.bytes.slice(0, PREVIEW_BYTES))} ...`;
+        row.append(particleIdLine, anchorRef, hash, hex);
         target.append(row);
       }
     }
