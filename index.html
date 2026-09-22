@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>BitPerfect - Entropography</title>
+  <title>BitPerfect - Entropography (EDR v2.1)</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <!-- PostHog product analytics. Approved cookie / localStorage exception.
        Runs only on the live bitperfect.dev domain. -->
@@ -551,7 +551,7 @@
   <main>
     <header>
       <div>
-        <h1>Entropic Dispersal and Reassembly&trade; (EDR)</h1>
+        <h1>Entropic Dispersal and Reassembly&trade; (EDR) v2.1</h1>
         <p class="protocol-line">A Distributed Trust Data Protocol. No single breach reveals your data.</p>
         <p class="tagline">EDR splits a record into 1,024 masked particles across separate protected domains.
           Reconstruction requires the particle store, private anchors, authorization, and recovery nonce material.
@@ -1044,7 +1044,7 @@ https://github.com/TJXRP/bitperfect/tree/main/results/entropography-v4</textarea
       for (let i = 0; i < PARTICLE_COUNT; i++) {
         const shard = padded.slice(i * PARTICLE_BYTES, (i + 1) * PARTICLE_BYTES);
         const maskInput = encoder.encode(JSON.stringify({
-          domain: 'EDR-MASK-V1',
+          domain: 'EDR-MASK-V2.1',
           salt,
           particleIndex: i
         }));
